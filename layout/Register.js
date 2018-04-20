@@ -1,9 +1,20 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { DrawerNavigator, NavigationActions } from 'react-navigation' ;
-import { Icon, Button, Container, Header, Content, Left } from 'native-base';
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'react-native';
+import AppVarible from '../Model/AppVarible'
 
 export default class Register extends React.Component {
+
+  constructor(props) {
+    super(props)
+    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
+    this.state = {
+      deviceHeight,
+      deviceWidth,
+      name: '',
+      phone: ''
+    }
+  }
+
   static navigationOptions = ({ navigation }) => ({
     title: 'Register',
   })
@@ -14,14 +25,70 @@ export default class Register extends React.Component {
      
   })
   */
+
+  submitRegister = () => {
+    const { name, phone } = this.state 
+    AppVarible.setLogOn('name',name) 
+    AppVarible.setLogOn('phone',phone) 
+    const { firebase, logOn: { userID } } = AppVarible.appVarible 
+    firebase.database().ref('User').child(userID).child('name').set(name)  
+    firebase.database().ref('User').child(userID).child('phone').set(phone) 
+    this.props.navigation.navigate('NM')
+  }
+
   render() {
+    const { deviceHeight, deviceWidth } = this.state
     return (
-      
-      <View style={styles.container}>
-        <DrawerHeader {...this.props} />
-        <Text style={styles.temp}>Hey I'm Register Page najaaaa !!!</Text>
+      <View style={styles.container} >
+        <View style={[styles.header, {
+          height: 1 / 10 * deviceHeight,
+          width: deviceWidth,
+          top: 1 / 10 * deviceHeight
+        }]} >
+          <Text style={{ fontSize: 1 / 20 * deviceHeight }} > สร้างบัญชีผู้ใช้ </Text>
+        </View>
+        <View style={styles.inputBox} >
+          <View style={[styles.text, {
+            height: 1 / 20 * deviceHeight,
+            width: 0.8 * deviceWidth
+          }]} >
+            <Text style={{ fontSize: 1 / 40 * deviceHeight }} > ชื่อ : </Text>
+          </View>
+          <TextInput
+            style={{
+              height: 1.5 / 20 * deviceHeight,
+              width: 0.8 * deviceWidth,
+              fontSize: 1 / 30 * deviceHeight
+            }}
+            underlineColorAndroid='#0070C0'
+            placeholder='กรุณากรอก ชื่อ-นามสกุล'
+            onChangeText={(Text) => { this.setState({ name: Text }) }} />
+          <View style={[styles.text, {
+            height: 1 / 20 * deviceHeight,
+            width: 0.8 * deviceWidth
+          }]} >
+            <Text style={{ fontSize: 1 / 40 * deviceHeight }} > เบอร์โทรศัพท์ : </Text>
+          </View>
+          <TextInput
+            style={{
+              height: 1.5 / 20 * deviceHeight,
+              width: 0.8 * deviceWidth,
+              fontSize: 1 / 30 * deviceHeight
+            }}
+            underlineColorAndroid='#0070C0'
+            placeholder='กรุณากรอก เบอร์โทรศัพท์'
+            onChangeText={(Text) => { this.setState({ phone: Text }) }} />
+        </View>
+        <TouchableOpacity onPress={() => this.submitRegister()}
+          style={[styles.summitButton, {
+            height: 1 / 10 * deviceHeight,
+            width: 0.6*deviceWidth,
+            bottom: 1 / 20 * deviceHeight,
+            borderRadius: 1 / 3 * 1 / 10 * deviceHeight
+          }]} >
+          <Text style={[styles.summitButtonText,{ fontSize: 1 / 20 * deviceHeight }]} > ยืนยัน </Text>
+        </TouchableOpacity>
       </View>
-      
     );
   }
 }
@@ -31,15 +98,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     justifyContent: 'center',
+    alignItems: 'center'
   },
-  temp: {
-    flex: 1 ,
-    alignItems: 'center',
+  text: {
     justifyContent: 'center',
+    alignItems: 'flex-start'
   },
-  icon: {
-    width: 24,
-    height: 24,
+  inputBox: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  header: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute'
+  },
+  summitButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    backgroundColor: '#0070C0'
+  },
+  summitButtonText: {
+    //flex: 1,
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    color: '#FFFFFF',
   },
 });
 

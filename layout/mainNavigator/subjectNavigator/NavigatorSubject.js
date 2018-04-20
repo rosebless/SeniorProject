@@ -2,7 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, Button, Image, TouchableOpacity } from 'react-native';
 import { StackNavigator } from 'react-navigation' ;
 import NavigatorMain from '../NavigatorMain';
-import SubjectManagePage from './SubjectManage';
+import SubjectManage_SelectionPage from './SubjectManage_Selection';
+import ManagerPage from './Manager'
 
 export default class NavigatorSubject extends React.Component {
     static navigationOptions = ({ navigation }) => ({
@@ -21,13 +22,14 @@ export default class NavigatorSubject extends React.Component {
     // add screenProps
     // alert('test ->', JSON.stringify(this.props))
     return (
-        <SNSubject screenProps={{ rootNavigation: this.props.navigation }} />
+      <SNSubject /*screenProps={{ rootNavigation: this.props.navigation }}*/ />
     );
   }
 }
 
 const SNSubject = StackNavigator({
-    SubjectManage: { screen: SubjectManagePage } ,
+    SubjectManage_Selection: { screen: SubjectManage_SelectionPage } , 
+    Manager: { screen: ManagerPage }
 },{
     headerMode: 'none', 
     headerVisible: false,

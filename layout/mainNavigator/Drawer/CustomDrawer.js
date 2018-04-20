@@ -4,106 +4,151 @@
  * @flow
  */
 
-import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+// import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { Container, Content, Icon, Header, Body } from 'native-base'
-//import styles from './SideMenu.style';
-import {NavigationActions, DrawerItems} from 'react-navigation';
-import { AppRegistry, StyleSheet, ScrollView, Text, View, Image} from 'react-native';
+import { NavigationActions, DrawerItems } from 'react-navigation';
+import { StyleSheet, ScrollView, Text, View, Image, TouchableOpacity } from 'react-native';
+import AppVarible from '../../../Model/AppVarible'
 
 export default class CustomDrawer extends React.Component {
+
+  constructor(props) {
+    super(props)
+    const { deviceHeight, deviceWidth } = AppVarible.appVarible.deviceSize
+    if (deviceHeight < deviceWidth) {
+      var profile_height = 3 / 20 * deviceHeight
+      var profile_width = 3 / 20 * deviceHeight
+    } else {
+      var profile_height = 1.5 / 4 * deviceWidth
+      var profile_width = 1.5 / 4 * deviceWidth
+    }
+    this.state = {
+      deviceHeight,
+      deviceWidth,
+      profile_height,
+      profile_width
+    }
+  }
+
   static navigationOptions = ({ navigation }) => ({
     title: 'Custom',
-    //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
-    //drawerLabel: 'Notification',
-    
   })
-  /*
-  navigateToScreen = (route) => () => {
-    const navigateAction = NavigationActions.navigate({
-      routeName: route
-    });
-    this.props.navigation.dispatch(navigateAction);
-  }
-  */
- /*
-  render () {
-    return (
-      <Container>
-    <Header style={styles.drawerHeader}>
-      <Body>
-        <Image 
-          style={styles.drawerImage}
-          source={require('../../../icon/background1.png')} />
-      </Body>
-    </Header>
-    <Content>
-    <DrawerItems {...props} />
-    </Content>
 
-  </Container>
-    );
-    */
-  
-  render () {
+  logOut = () => {
+    const { navigate } = AppVarible.appVarible.navigationSaved.login
+    AppVarible.setAppVarible('navigationSaved', {
+      login: { status: false, navigate: '' },
+      main: { status: false, navigate: '' },
+      subject: { status: false, navigate: '', focus: '' },
+      scanning: { status: false, navigate: '', focus: '' },
+      dashboard: { status: false, navigate: '', focus: '' }
+    })
+    navigate('Login')
+  }
+
+  render() {
+    const { screenProps: { drawerProps }, screenProps: { drawerProps: { items } }, screenProps: { drawerWidth } } = this.props
+    const { deviceHeight, deviceWidth, profile_height, profile_width } = this.state
+    const { picUrl, name } = AppVarible.appVarible.logOn
+    //const itemsmain
     return (
       <View style={styles.container}>
-        <ScrollView>
-          <View>
-            <Text style={styles.sectionHeadingStyle}>
-              Section 1
-            </Text>
-            <View style={styles.navSectionStyle}>
-              <Text style={styles.navItemStyle} onPress={this.navigateToScreen('Main')}>
-              Page1
-              </Text>
-            </View>
+        <View style={[styles.profileHeader, {
+          height: 3 / 10 * deviceHeight,
+          width: drawerWidth,
+        }]}>
+          <Image
+            source={require('../../../pics/background1.png')}
+            style={{
+              height: 3 / 10 * deviceHeight,
+              width: drawerWidth,
+            }}
+          />
+          <View style={[styles.popUp, {
+            height: 3 / 10 * deviceHeight,
+            width: drawerWidth,
+            top: 0
+          }]}>
+            <Image
+              source={{ uri: picUrl }}
+              style={{
+                height: profile_height,
+                width: profile_width,
+                borderRadius: 1 / 2 * profile_height,
+                borderWidth: 1 / 75 * profile_height,
+                borderColor: '#0070C0', 
+                backgroundColor: '#0070C0'
+              }}
+            />
+            <Text style={{ marginTop: 1 / 60 * deviceHeight, fontSize: 1 / 40 * deviceHeight }} > {name} </Text>
           </View>
-          <View>
-            <Text style={styles.sectionHeadingStyle}>
-              Section 2
-            </Text>
-            <View style={styles.navSectionStyle}>
-              <Text style={styles.navItemStyle} onPress={this.navigateToScreen('SubjectManage')}>
-                Page2
-              </Text>
-              <Text style={styles.navItemStyle} onPress={this.navigateToScreen('Main')}>
-                Page3
-              </Text>
-            </View>
-          </View>
+        </View>
+        <ScrollView
+          style={[styles.scrollView, {
+            height: 11 / 20 * deviceHeight,
+            width: drawerWidth
+          }]}>
+          <DrawerItems {...drawerProps} />
         </ScrollView>
-        <View style={styles.footerContainer}>
-          <Text>This is my fixed footer</Text>
+        <View style={[styles.bottomFixed, {
+          height: 3 / 20 * deviceHeight,
+          width: drawerWidth
+        }]} >
+          <TouchableOpacity
+            onPress={() => this.logOut()}
+            style={[styles.logOutButton, {
+              height: 1.5 / 20 * deviceHeight,
+              width: 0.6 * drawerWidth,
+              borderRadius: 1 / 2 * 1.5 / 10 * deviceHeight
+            }]}>
+            <Text
+              style={[styles.logOutText, {
+                fontSize: 1.5 / 40 * deviceHeight
+              }]}>
+              Log Out
+          </Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
-    
   }
 }
 
-CustomDrawer.propTypes = {
-  navigation: PropTypes.object
-};
+// CustomDrawer.propTypes = {
+//   navigation: PropTypes.object
+// };
 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 20,
     flex: 1
   },
-  navItemStyle: {
-    padding: 10
+  scrollView: {
+    backgroundColor: '#FFFFFF'
   },
-  navSectionStyle: {
-    backgroundColor: 'lightgrey'
+  profileHeader: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionHeadingStyle: {
-    paddingVertical: 10,
-    paddingHorizontal: 5
+  popUp: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute'
   },
-  footerContainer: {
-    padding: 20,
-    backgroundColor: 'lightgrey'
+  bottomFixed: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logOutButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0070C0'
+  },
+  logOutText: {
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    color: '#FFFFFF',
   }
 });
 

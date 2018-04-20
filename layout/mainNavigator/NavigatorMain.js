@@ -1,26 +1,69 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
 import { Container, Content, Icon, Header, Body } from 'native-base'
-import { DrawerNavigator, NavigationActions, DrawerItems, SafeAreaView  } from 'react-navigation' ; 
+import { DrawerNavigator, NavigationActions, DrawerItems, SafeAreaView } from 'react-navigation';
 
 import MainPage from './MainPage'
-import ProfilePage from './ProfilePage' 
-import NavigatorSubject from './subjectNavigator/NavigatorSubject' 
-import NavigatorScanning from './scanningNavigator/NavigatorScanning' 
-import DashBoardPage from './DashBoard' 
+import ProfilePage from './ProfilePage'
+import NavigatorSubject from './subjectNavigator/NavigatorSubject'
+import NavigatorScanning from './scanningNavigator/NavigatorScanning'
+import NavigatorDashboard from './dashBoardNavigator/NavigatorDashboard'
 import CustomDrawer from './Drawer/CustomDrawer'
+import AppVarible from '../../Model/AppVarible'
 
 export default class NavigatorMain extends React.Component {
-    
-  static navigationOptions = ({navigation}) => ({
+
+  constructor(props) {
+    super(props)
+    const { deviceHeight, deviceWidth } = AppVarible.appVarible.deviceSize
+    this.state = {
+      deviceHeight,
+      deviceWidth
+    }
+  }
+
+
+
+  static navigationOptions = ({ navigation }) => ({
     title: 'NM'
-    })
+  })
 
   render() {
+    const { deviceHeight, deviceWidth } = this.state
+    const drawerWidth = 0.75 * deviceWidth
+    const DNMainPage = DrawerNavigator({
+      Main: {
+        screen: MainPage
+      },
+      Profile: {
+        screen: ProfilePage
+      },
+      NSubject: {
+        screen: NavigatorSubject
+      },
+      NScanning: {
+        screen: NavigatorScanning
+      },
+      NDashBoard: {
+        screen: NavigatorDashboard
+      },
+    }, {
+        initialRouteName: 'Main',
+        drawerWidth,
+        contentComponent: props => <CustomDrawer screenProps={{ drawerWidth, drawerProps: { ...props } }} />,
+        drawerOpenRoute: 'DrawerOpen',
+        drawerCloseRoute: 'DrawerClose',
+        drawerToggleRoute: 'DrawerToggle',
+        contentOptions: {
+          activeTintColor: 'red',
+        },
+        navigationOptions: {
+          gesturesEnabled: false
+        }
+      });
     return (
-
-      <DNMainPage screenProps='abc'/>
-
+      <DNMainPage
+      />
     );
   }
 }
@@ -42,49 +85,56 @@ const styles = StyleSheet.create({
     borderRadius: 75
   }
 });
+// console.log(0.75*AppVarible.appVarible.deviceSize.deviceWidth)
+// //console.log(DNMainPage.drawerWidth)
+// console.log(AppVarible.appVarible.deviceSize.deviceWidth)
+// console.log(AppVarible.appVarible.deviceSize.deviceHeight)
+// const DNMainPage = DrawerNavigator({
+//   Main: {
+//     screen: MainPage
+//   },
+//   Profile: {
+//     screen: ProfilePage
+//   },
+//   NSubject: {
+//     screen: NavigatorSubject
+//   },
+//   NScanning: {
+//     screen: NavigatorScanning
+//   },
+//   NDashBoard: {
+//     screen: NavigatorDashboard
+//   },
+// },{    
+//     initialRouteName: 'Main' , 
+//    drawerWidth: 0.75*AppVarible.appVarible.deviceSize.deviceWidth,
+//   contentComponent: props => <CustomDrawer screenProps={ { drawerProps: {...props} } } /> ,
+//     drawerOpenRoute: 'DrawerOpen',
+//     drawerCloseRoute: 'DrawerClose',
+//     drawerToggleRoute: 'DrawerToggle',
+//     contentOptions: {
+//       activeTintColor: 'red',
+//     },  
+//     navigationOptions:{
+//       gesturesEnabled: false
+//   }
+// });
 
-const DNMainPage = DrawerNavigator({
-  Main: {
-    screen: MainPage
-  },
-  Profile: {
-    screen: ProfilePage
-  },
-  NSubject: {
-    screen: NavigatorSubject
-  },
-  NScanning: {
-    screen: NavigatorScanning
-  },
-  DashBoard: {
-    screen: DashBoardPage
-  },
-},{    
-    initialRouteName: 'Main' ,
-    contentComponent: props => /*<Text style={styles.temp}>Hey I'm aaa najaaaa !!!</Text>*/ <DrawerItems {...props} /> ,
-    drawerOpenRoute: 'DrawerOpen',
-    drawerCloseRoute: 'DrawerClose',
-    drawerToggleRoute: 'DrawerToggle',
-    contentOptions: {
-      activeTintColor: 'red',
-    },  
-});
 
+// const CustomDrawerContentComponent = (props) => {
 
-const CustomDrawerContentComponent = (props) => {
+//   <Container>
+//     <Header style={styles.drawerHeader}>
+//       <Body>
+//         <Image
+//           style={styles.drawerImage}
+//           source={require('../../pics/background1.png')} />
+//       </Body>
+//     </Header>
+//     <Content>
+//       <DrawerItems {...props} />
+//     </Content>
 
-  <Container>
-    <Header style={styles.drawerHeader}>
-      <Body>
-        <Image
-          style={styles.drawerImage}
-          source={require('../../pics/background1.png')} />
-      </Body>
-    </Header>
-    <Content>
-      <DrawerItems {...props} />
-    </Content>
+//   </Container>
 
-  </Container>
-  
-};
+// };
