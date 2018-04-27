@@ -1,0 +1,9 @@
+.containerItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    border: solid;
+    border-width: thick;
+    border-color: rgb(15, 111, 198);
+    background-color: white;
+}

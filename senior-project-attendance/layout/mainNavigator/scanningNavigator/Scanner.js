@@ -334,8 +334,18 @@ export default class Scanner extends React.Component {
                 height: deviceHeight,
                 width: deviceWidth,
                 marginTop: 0
-              }}
+              }} 
+              barCodeTypes={[BarCodeScanner.Constants.BarCodeType.code39]} 
             >
+
+              <View style={styles.backgroundTop} />
+              <View style={styles.backgroundTCenter} > 
+                {/* <View style={styles.backgroundTCenterLeft} /> 
+                <View style={[styles.backgroundScanBox, { height: 3/20 * deviceHeight }]} />
+                <View style={styles.backgroundTCenterRight} />  */}
+              </View>
+              <View style={styles.backgroundBot} /> 
+
               <Animated.View style={[styles.topBar, animeteStyle, { height: 1 / 10 * deviceHeight, top: -1 / 10 * deviceHeight }]}>
                 <Image
                   source={this.state.statusIcon}
@@ -351,14 +361,6 @@ export default class Scanner extends React.Component {
                   {this.state.statusOutput}
                 </Text>
               </Animated.View> 
-                  
-              <View style={styles.backgroundTop} />
-              <View style={styles.backgroundTCenter} > 
-                {/* <View style={styles.backgroundTCenterLeft} /> 
-                <View style={[styles.backgroundScanBox, { height: 3/20 * deviceHeight }]} />
-                <View style={styles.backgroundTCenterRight} />  */}
-              </View>
-              <View style={styles.backgroundBot} /> 
 
               <View style={[styles.countStudents, {
                 height: 1 / 10 * deviceHeight,

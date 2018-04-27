@@ -1,0 +1,19 @@
+.containerHeader {
+    display: flex; 
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    top: 0px; 
+}
+p {
+    font-family: 'bangna-new';  
+    color: rgb(15, 111, 198);
+    /* background-color: violet; */
+}
+
+@font-face {
+    font-family: 'bangna-new';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../font/bangna-new.ttf') format('truetype')
+}
