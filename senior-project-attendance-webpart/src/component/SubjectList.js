@@ -11,8 +11,13 @@ export default class SubjectList extends React.Component {
         }
     }
 
+    formatFileToSubject = (file) => ({
+        name: file.name,
+        addedTime: file.addedTime 
+    })
+
     render() {
-        const { subjects, mode, height, width, cancelSelection } = this.props
+        const { files, mode, height, width, cancelSelection } = this.props
         return (
             // this.props.history.push('/page-2')
             <div style={{
@@ -21,10 +26,14 @@ export default class SubjectList extends React.Component {
                 width: 0.95 * 0.9 * 0.6 * width
             }} >
                 {
-                    subjects.map((subject, index) => ( // ใช้วงเล็บ แล้วจะมองเป็น return ถ้าใช้ ปีกกาต้องใส่เอง
-                        <SubjectItem mode={mode} subject={subject} index={index} height={height} width={width}
-                            cancelSelection={(index) => cancelSelection(index)} />
-                    ))
+                    files.map((file) => {
+                        const subject = this.formatFileToSubject(file) 
+                        console.log('file.id' ,file.id)
+                        return (<SubjectItem mode={mode} subject={subject} key={file.id} id={file.id} height={height} width={width}
+                            cancelSelection={cancelSelection} />)
+                    } // ใช้วงเล็บ แล้วจะมองเป็น return ถ้าใช้ ปีกกาต้องใส่เอง
+                    )
+
                 }
             </div>
         );

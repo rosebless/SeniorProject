@@ -5,7 +5,7 @@ import '../css/Header.css'
 export default class Import extends React.Component { 
     render() { 
         const { pageName, height, width } = this.props
-        console.log(height, width)
+        // console.log(height, width)
         return (
             <div className = 'containerHeader' style={{  
                 height: 3.75 / 19 * height,

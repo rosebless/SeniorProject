@@ -9,29 +9,14 @@ import NavigatorSubject from './subjectNavigator/NavigatorSubject'
 import NavigatorScanning from './scanningNavigator/NavigatorScanning'
 import NavigatorDashboard from './dashBoardNavigator/NavigatorDashboard'
 import CustomDrawer from './Drawer/CustomDrawer'
-import AppVarible from '../../Model/AppVarible'
 
 export default class NavigatorMain extends React.Component {
 
   constructor(props) {
     super(props)
-    const { deviceHeight, deviceWidth } = AppVarible.appVarible.deviceSize
-    this.state = {
-      deviceHeight,
-      deviceWidth
-    }
-  }
-
-
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'NM'
-  })
-
-  render() {
-    const { deviceHeight, deviceWidth } = this.state
-    const drawerWidth = 0.75 * deviceWidth
-    const DNMainPage = DrawerNavigator({
+    const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl } } } } = this.props
+    const drawerWidth = 0.75 * deviceSize.deviceWidth
+    this.DNMainPage = DrawerNavigator({
       Main: {
         screen: MainPage
       },
@@ -50,7 +35,7 @@ export default class NavigatorMain extends React.Component {
     }, {
         initialRouteName: 'Main',
         drawerWidth,
-        contentComponent: props => <CustomDrawer screenProps={{ drawerWidth, drawerProps: { ...props } }} />,
+        contentComponent: props => <CustomDrawer screenProps={{ deviceSize, drawerWidth, goBack, name, photoUrl, drawerProps: { ...props } }} />,
         drawerOpenRoute: 'DrawerOpen',
         drawerCloseRoute: 'DrawerClose',
         drawerToggleRoute: 'DrawerToggle',
@@ -61,8 +46,20 @@ export default class NavigatorMain extends React.Component {
           gesturesEnabled: false
         }
       });
+  }
+
+
+
+  static navigationOptions = ({ navigation }) => ({
+    title: 'NM'
+  })
+
+  render() {
+    const { deviceSize } = this.props.screenProps
+    const { ...params } = this.props.navigation.state.params // userID, photoUrl, name, phone 
     return (
-      <DNMainPage
+      <this.DNMainPage
+        screenProps={{ deviceSize, ...params }}
       />
     );
   }
@@ -85,6 +82,8 @@ const styles = StyleSheet.create({
     borderRadius: 75
   }
 });
+
+
 // console.log(0.75*AppVarible.appVarible.deviceSize.deviceWidth)
 // //console.log(DNMainPage.drawerWidth)
 // console.log(AppVarible.appVarible.deviceSize.deviceWidth)

@@ -17,11 +17,13 @@ export default class NavigatorDashboard extends React.Component {
       })
     
   render() {
+    const { deviceSize, userID } = this.props.screenProps 
+    const drawerNavigate = this.props.navigation.navigate
     // @FIX step 1
     // add screenProps
     // alert('test ->', JSON.stringify(this.props))
     return (
-      <SNDashboard /*screenProps={{ rootNavigation: this.props.navigation }}*/ />
+      <SNDashboard /*screenProps={{ rootNavigation: this.props.navigation }}*/ screenProps={{ deviceSize, userID, drawerNavigate }} />
     );
   }
 }

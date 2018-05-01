@@ -5,6 +5,7 @@ import { StackNavigator } from 'react-navigation' ;
 import Scanning_SelectionPage from  './Scanning_Selection' ;
 import ScannerPage from './Scanner' ;
 import ByPassToDashboardPage from './ByPassToDashboard' 
+import ManualAttendancePage from './ManualAttendance'
 
 export default class NavigatorLogin extends React.Component {
     static navigationOptions = ({ navigation }) => ({
@@ -21,11 +22,12 @@ export default class NavigatorLogin extends React.Component {
         
       })
   render() {
-
+    const { deviceSize, userID } = this.props.screenProps 
+    const drawerNavigate = this.props.navigation.navigate
     // @FIX step 1
     // add screenProps
     return (
-        < SNScanning /*screenProps={{ rootNavigation: this.props.navigation }}*/ />
+        <SNScanning screenProps={{ deviceSize, userID, drawerNavigate }} />
     ); 
   }
 }
@@ -33,7 +35,8 @@ export default class NavigatorLogin extends React.Component {
 const SNScanning = StackNavigator({
     Scanning_Selection: { screen: Scanning_SelectionPage } ,
     Scanner: { screen: ScannerPage } , 
-    ByPassToDashboard: { screen: ByPassToDashboardPage }
+    ByPassToDashboard: { screen: ByPassToDashboardPage },  
+    ManualAttendance: { screen: ManualAttendancePage}
 },{
     headerMode: 'none',
     headerVisible: false,

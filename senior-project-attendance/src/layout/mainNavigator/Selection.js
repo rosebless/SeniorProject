@@ -5,6 +5,7 @@ import { DrawerNavigator, NavigationActions } from 'react-navigation';
 import DrawerHeader from './Drawer/DrawerHeader';
 import { Icon, Button, Container, Header, Content, Left } from 'native-base';
 import AppVarible from '../../Model/AppVarible'
+import firebase from '../../config/firebase'
 
 export default class ScanningPage extends React.Component {
   /*
@@ -23,24 +24,56 @@ static navigationOptions = ({ navigation }) => ({
 */
   constructor(props) {
     super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
     this.state = {
-      deviceHeight,
-      deviceWidth
+      subjects: []
     }
   }
+
+  componentWillMount = () => {
+    this.getUserSubjectsFormFirebase()
+  }
+
+
+  getUserSubjectsFormFirebase = () => {
+    const { userID } = this.props.screenProps
+    console.log(userID)
+    firebase.database().ref('/User').child(userID).child('subjects').on('value', snapshot => {
+      // console.log(snapshot.val())
+      // resolve(snapshot.val()); 
+      const objSubject = snapshot.val()
+      const subjects = Object.keys(objSubject).map(key =>
+        key.split('-')[3]
+          ? {
+            id: key,
+            subjectCode: key.split('-')[2],
+            subjectName: objSubject[key].name,
+            section: key.split('-')[3],
+            ImageProduct: require('../../pics/temp3.png')
+          }
+          : {
+            id: key,
+            subjectCode: key.split('-')[2],
+            subjectName: objSubject[key].name,
+            ImageProduct: require('../../pics/temp3.png')
+          }
+      )
+      this.setState({ subjects })
+    })
+  }
+
   render() {
     const {
-      screenProps: { namePage },
-      screenProps: { customNavigate },
-      screenProps: { screenNavigate },
-      screenProps: { focusVarible },
-      ...props
-    } = this.props;
-    const { deviceHeight, deviceWidth } = this.state
+      deviceSize: { deviceHeight, deviceWidth },
+      userID,
+      drawerNavigate,
+      namePage,
+      customNavigate,
+      screenNavigate,
+    } = this.props.screenProps;
+    const { subjects } = this.state
     return (
       <View style={styles.container}>
-        <DrawerHeader {...this.props} /*rootNavigation={rootNavigation}*/ />
+        <DrawerHeader drawerNavigate={drawerNavigate} deviceHeight={deviceHeight} />
         <View style={styles.top}>
           <Image source={require('../../pics/logo.png')} style={{ position: 'absolute', width: 320 / 367 * 3 / 20 * deviceHeight, height: 3 / 20 * deviceHeight, left: 0.05 * deviceWidth }} />
           <Text style={{ fontSize: 1.5 / 40 * deviceHeight }} > {namePage} </Text>
@@ -48,7 +81,7 @@ static navigationOptions = ({ navigation }) => ({
         <View style={styles.bot} >
           <FlatList
             style={{ width: 0.9 * deviceWidth }}
-            data={data}
+            data={subjects}
             renderItem={({ item }) => (
 
               <View style={{
@@ -56,8 +89,7 @@ static navigationOptions = ({ navigation }) => ({
               }}>
                 <TouchableOpacity
                   onPress={() => {
-                    customNavigate(screenNavigate)
-                    focusVarible(item.subjectCode)
+                    customNavigate(screenNavigate,{ subjects, focus: item })
                   }} >
                   <View style={{
                     flex: 1,
@@ -83,27 +115,32 @@ static navigationOptions = ({ navigation }) => ({
                       flexWrap: "wrap"
                     }}>
                       <Text style={[styles.itemName, {
-                        fontSize: 1 / 10 * 1 / 6 * this.state.deviceHeight
+                        fontSize: 1 / 10 * 1 / 6 * deviceHeight
                       }]}>
                         {item.subjectCode}
                       </Text>
                       <Text style={[styles.itemDetail, {
-                        fontSize: 1 / 10 * 1 / 6 * this.state.deviceHeight
+                        fontSize: 1 / 10 * 1 / 6 * deviceHeight
                       }]}>
                         {item.subjectName}
                       </Text>
-                      <Text style={[styles.itemCode, {
-                        fontSize: 1 / 10 * 1 / 6 * this.state.deviceHeight
-                      }]}>
-                        ( Sec {item.section} )
-                         </Text>
+                      { // condition && expression => if(conditon) expression it is short if without else 
+                        item.section
+                        && (
+                          <Text style={[styles.itemCode, {
+                            fontSize: 1 / 10 * 1 / 6 * deviceHeight
+                          }]}>
+                            ( Sec {item.section} )
+                             </Text>
+                        )
+                      }
                     </View>
                   </View>
                 </TouchableOpacity>
               </View>
 
             )}
-            keyExtractor={item => item.subjectCode}
+            keyExtractor={item => item.id}
           //numColumns={numColumns} 
           />
         </View>
@@ -111,17 +148,18 @@ static navigationOptions = ({ navigation }) => ({
     );
   }
 }
-const data = [
-  { subjectCode: '05016013', subjectName: 'FUNCTION OF COMPLEX VARIABLES', section: '1', ImageProduct: require('../../pics/temp3.png') },
-  { subjectCode: '05016062', subjectName: 'SPECIAL TOPICS IN APPLIED MATHEMATICS FOR BUSINESS', section: '1', ImageProduct: require('../../pics/temp1.png') },
-  { subjectCode: '05016117', subjectName: 'TIME SERIES AND SURVIVAL MODEL ESTIMATION', section: '1', ImageProduct: require('../../pics/temp2.png') },
-  { subjectCode: '05016146', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 1', section: '1', ImageProduct: require('../../pics/temp5.png') },
-  { subjectCode: '05016147', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 2', section: '1', ImageProduct: require('../../pics/temp2.png') },
-  { subjectCode: '05016008', subjectName: 'NUMERICAL ANALYSIS 1', section: '1', ImageProduct: require('../../pics/temp3.png') },
-  { subjectCode: '05016007', subjectName: 'PARTIAL DIFFERENTIAL EQUATION', section: '1', ImageProduct: require('../../pics/temp4.png') },
-  { subjectCode: '05016048', subjectName: 'FINANCIAL MATHEMATICS', section: '1', ImageProduct: require('../../pics/temp3.png') },
-  { subjectCode: '05016114', subjectName: 'MATHEMATICAL MODELLING IN INDUSTRY', section: '1', ImageProduct: require('../../pics/temp2.png') }
-];
+
+// const data = [
+//   { subjectCode: '05016013', subjectName: 'FUNCTION OF COMPLEX VARIABLES', section: '1', ImageProduct: require('../../pics/temp3.png') },
+//   { subjectCode: '05016062', subjectName: 'SPECIAL TOPICS IN APPLIED MATHEMATICS FOR BUSINESS', section: '1', ImageProduct: require('../../pics/temp1.png') },
+//   { subjectCode: '05016117', subjectName: 'TIME SERIES AND SURVIVAL MODEL ESTIMATION', section: '1', ImageProduct: require('../../pics/temp2.png') },
+//   { subjectCode: '05016146', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 1', section: '1', ImageProduct: require('../../pics/temp5.png') },
+//   { subjectCode: '05016147', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 2', section: '1', ImageProduct: require('../../pics/temp2.png') },
+//   { subjectCode: '05016008', subjectName: 'NUMERICAL ANALYSIS 1', section: '1', ImageProduct: require('../../pics/temp3.png') },
+//   { subjectCode: '05016007', subjectName: 'PARTIAL DIFFERENTIAL EQUATION', section: '1', ImageProduct: require('../../pics/temp4.png') },
+//   { subjectCode: '05016048', subjectName: 'FINANCIAL MATHEMATICS', section: '1', ImageProduct: require('../../pics/temp3.png') },
+//   { subjectCode: '05016114', subjectName: 'MATHEMATICAL MODELLING IN INDUSTRY', section: '1', ImageProduct: require('../../pics/temp2.png') }
+// ];
 //const numColumns = 2; 
 
 const styles = StyleSheet.create({

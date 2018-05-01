@@ -1,16 +1,17 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
-import NavigatorLogin from './layout/NavigatorLogin';
-import NavigatorMain from './layout/mainNavigator/MainPage';
-import AppVarible from './Model/AppVarible' 
-import Test from './Test/Test'
+import { Dimensions } from 'react-native';
+import NavigatorLogin from './src/layout/NavigatorLogin';
 
 export default class App extends React.Component {
+  state = {
+    deviceSize: {
+      deviceHeight: Dimensions.get('window').height,
+      deviceWidth: Dimensions.get('window').width
+    }
+  }
   render() {
-    AppVarible.setDeviceSize()
-    AppVarible.setFirebase()
     return (
-      <NavigatorLogin />
+      <NavigatorLogin deviceSize={this.state.deviceSize} />
     );
   }
 }

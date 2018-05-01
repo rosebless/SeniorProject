@@ -13,9 +13,26 @@ import AppVarible from '../../../Model/AppVarible'
 
 export default class CustomDrawer extends React.Component {
 
-  constructor(props) {
-    super(props)
-    const { deviceHeight, deviceWidth } = AppVarible.appVarible.deviceSize
+
+  static navigationOptions = ({ navigation }) => ({
+    title: 'Custom',
+  })
+
+  logOut = () => {
+    const { goBack } = this.props.screenProps
+    // AppVarible.setAppVarible('navigationSaved', {
+    //   login: { status: false, navigate: '' },
+    //   main: { status: false, navigate: '' },
+    //   subject: { status: false, navigate: '', focus: '' },
+    //   scanning: { status: false, navigate: '', focus: '' },
+    //   dashboard: { status: false, navigate: '', focus: '' }
+    // })
+    goBack()
+  }
+
+  render() {
+    const { screenProps: { drawerProps, drawerWidth }, screenProps: { drawerProps: { items } } } = this.props
+    const { deviceSize:{deviceHeight, deviceWidth}, photoUrl, name } = this.props.screenProps
     if (deviceHeight < deviceWidth) {
       var profile_height = 3 / 20 * deviceHeight
       var profile_width = 3 / 20 * deviceHeight
@@ -23,34 +40,7 @@ export default class CustomDrawer extends React.Component {
       var profile_height = 1.5 / 4 * deviceWidth
       var profile_width = 1.5 / 4 * deviceWidth
     }
-    this.state = {
-      deviceHeight,
-      deviceWidth,
-      profile_height,
-      profile_width
-    }
-  }
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'Custom',
-  })
-
-  logOut = () => {
-    const { navigate } = AppVarible.appVarible.navigationSaved.login
-    AppVarible.setAppVarible('navigationSaved', {
-      login: { status: false, navigate: '' },
-      main: { status: false, navigate: '' },
-      subject: { status: false, navigate: '', focus: '' },
-      scanning: { status: false, navigate: '', focus: '' },
-      dashboard: { status: false, navigate: '', focus: '' }
-    })
-    navigate('Login')
-  }
-
-  render() {
-    const { screenProps: { drawerProps }, screenProps: { drawerProps: { items } }, screenProps: { drawerWidth } } = this.props
-    const { deviceHeight, deviceWidth, profile_height, profile_width } = this.state
-    const { picUrl, name } = AppVarible.appVarible.logOn
+    // const { picUrl, name } = AppVarible.appVarible.logOn
     //const itemsmain
     return (
       <View style={styles.container}>
@@ -71,7 +61,7 @@ export default class CustomDrawer extends React.Component {
             top: 0
           }]}>
             <Image
-              source={{ uri: picUrl }}
+              source={{ uri: photoUrl }}
               style={{
                 height: profile_height,
                 width: profile_width,

@@ -2,27 +2,14 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, Dimensions, Button } from 'react-native';
 import { DrawerNavigator, NavigationActions } from 'react-navigation';
 import DrawerHeader from './Drawer/DrawerHeader';
-import { Icon, Container, Header, Content, Left } from 'native-base';
+import { Icon, Container, Header, Content, Left } from 'native-base'; 
+import firebase from '../../config/firebase'
 
 import AppVarible from '../../Model/AppVarible'
 
 export default class MainPage extends React.Component {
   constructor(props) {
     super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
-    if (deviceHeight < deviceWidth) {
-      var profile_height = 7 / 20 * deviceHeight
-      var profile_width = 7 / 20 * deviceHeight
-    } else {
-      var profile_height = 1 / 2 * deviceWidth
-      var profile_width = 1 / 2 * deviceWidth
-    }
-    this.state = {
-      deviceHeight,
-      deviceWidth,
-      profile_height,
-      profile_width
-    }
   }
   static navigationOptions = ({ navigation }) => ({
     title: 'หน้าหลัก',
@@ -46,24 +33,18 @@ export default class MainPage extends React.Component {
   */
 
   render() {
-
-    const { firebase } = AppVarible.appVarible
-    console.log(firebase.auth().currentUser)
-
-
     const { navigate } = this.props.navigation;
-    const { deviceHeight, deviceWidth, profile_height, profile_width } = this.state
-    const { name, picUrl } = AppVarible.appVarible.logOn
-
-    if (!AppVarible.appVarible.navigationSaved.main.status) {
-      AppVarible.setNavigation('main',{
-        status: true,
-        navigate
-      })
+    const { deviceSize:{deviceHeight, deviceWidth}, photoUrl, name } = this.props.screenProps
+    if (deviceHeight < deviceWidth) {
+      var profile_height = 7 / 20 * deviceHeight
+      var profile_width = 7 / 20 * deviceHeight
+    } else {
+      var profile_height = 1 / 2 * deviceWidth
+      var profile_width = 1 / 2 * deviceWidth
     }
     return (
       <View style={styles.container}>
-        <DrawerHeader {...this.props} />
+        <DrawerHeader drawerNavigate={navigate} deviceHeight={deviceHeight} />
         <View style={styles.page}>
 
           <View style={[styles.top, { width: deviceWidth, }]} >
@@ -79,7 +60,7 @@ export default class MainPage extends React.Component {
 
           <View style={[styles.popUp, { width: deviceWidth }]}>
             <Image
-              source={{ uri: picUrl }}
+              source={{ uri: photoUrl }}
               style={{
                 height: profile_height,
                 width: profile_width,

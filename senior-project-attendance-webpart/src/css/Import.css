@@ -69,7 +69,8 @@
     border: solid;
     border-width: thick;
     border-color: rgb(15, 111, 198);
-    background-color: white;
+    background-color: white; 
+    overflow-y: scroll;
 }
 .list {
 

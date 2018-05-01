@@ -1,5 +1,5 @@
 import { Dimensions } from 'react-native';
-import firebase, { firestore } from 'firebase'
+import firebase from 'firebase'
 
 export default class ApplicationVarible {
     static appVarible = {
@@ -43,9 +43,9 @@ export default class ApplicationVarible {
             deviceWidth: 100
         },
 
-        firebase: 'firebase'
+        firebase: firebase
 
-    }
+    } 
 
     static setFirebase() {
         var config = {
@@ -57,8 +57,6 @@ export default class ApplicationVarible {
             messagingSenderId: "36169682779"
         };
         firebase.initializeApp(config);
-        this.appVarible.firebase = firebase
-        // firebase.auth().
     }
 
     static setDeviceSize() {
@@ -88,6 +86,5 @@ export default class ApplicationVarible {
     // static setNavigationScainning(value) { this.appVarible.navigationSaved.scanning = value }
     // static setNavigationDashboard(value) { this.appVarible.navigationSaved.dashboard = value } 
 
+}
 
-
-}   

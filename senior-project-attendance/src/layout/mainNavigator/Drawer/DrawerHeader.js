@@ -6,15 +6,6 @@ import { } from 'react-navigation'
 import AppVarible from '../../../Model/AppVarible';
 
 export default class DrawerHeader extends Component {
-    constructor(props) {
-        super(props)
-        const { deviceSize: { deviceHeight, deviceWidth }, navigationSaved: { main: { navigate } } } = AppVarible.appVarible
-        this.state = {
-            deviceHeight,
-            deviceWidth,
-            navigate
-        }
-    }
     render() {
 
         // @FIX step 3
@@ -24,22 +15,19 @@ export default class DrawerHeader extends Component {
         // subjectNavigate Screen =>  this.props.rootNavigation is object
         // your can see with log in XDE
 
-        /*
-        console.log('DrawerHeader:all props', this.props);
-        console.log(
-            'DrawerHeader:rootNavigation props',
-            this.props.rootNavigation
-        );
-        console.log(
-            'DrawerHeader:navigation props',
-            this.props.navigation
-        );
+        // console.log('DrawerHeader:all props', this.props);
+        // console.log(
+        //     'DrawerHeader:rootNavigation props',
+        //     this.props.rootNavigation
+        // );
+        // console.log(
+        //     'DrawerHeader:navigation props',
+        //     this.props.navigation
+        // );
 
-        const fnNavigate = this.props.rootNavigation
-            ? this.props.rootNavigation.navigate
-            : this.props.navigation.navigate;
-        const { navigate } = this.props.navigation;
-        */
+        // const fnNavigate = this.props.screenProps.drawerNavigation
+        //     ? this.props.screenProps.drawerNavigation.navigate            // navigate from sub-navigator of drawer
+        //     : this.props.navigation.navigate;               // navigate from drawer 
 
         // let mainNavigate = (screen) => Alert.alert(
         //     'Error', ` status = ${AppVarible.appVarible.navigationSaved.main.status} 
@@ -51,7 +39,7 @@ export default class DrawerHeader extends Component {
         //     mainNavigate = AppVarible.appVarible.navigationSaved.main.navigate
         // }
 
-        const { deviceHeight, deviceWidth, navigate } = this.state
+        const { deviceHeight, drawerNavigate } = this.props
 
         return (<View style={{
             height: 1 / 10 * deviceHeight,
@@ -64,7 +52,7 @@ export default class DrawerHeader extends Component {
                 onPress={() => {
                     // @FIX step 4
                     // call fnNavigate function
-                    navigate('DrawerOpen')       //fnNavigate('DrawerOpen');
+                    drawerNavigate('DrawerOpen')       //fnNavigate('DrawerOpen');
                     // navigate('DrawerOpen');
                     // alert(5555);
                     // alert(JSON.stringify(this.props.navigation))

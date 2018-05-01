@@ -2,22 +2,24 @@ import React from 'react';
 import { StyleSheet, Text, View, Button, Image, TouchableOpacity } from 'react-native';
 import AppVarible from '../Model/AppVarible'
 //import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin'
-import Expo from 'expo'; 
+import Expo from 'expo';
 import _ from 'lodash'
+import firebase from '../config/firebase'
 
 export default class Login extends React.Component {
   constructor(props) {
     super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
+    // const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
     this.state = {
-      deviceHeight,
-      deviceWidth,
-      userLogOn: {
-        email: '',
-        picUrl: ''
-      }
+      // deviceHeight,
+      // deviceWidth,
+      // userLogOn: {
+      //   email: '',
+      //   picUrl: ''
+      // }
     }
   }
+
   static navigationOptions = ({ navigation }) => ({
     title: 'Login'
   })
@@ -50,117 +52,97 @@ export default class Login extends React.Component {
         iosClientId: '243837215464-nhmsscljmnsrgpo2ln8fp0sgn75vnf5b.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
       });
-      console.log('result.type',result.type)
+      console.log('result.type', result.type)
       if (result.type === 'success') {
-        console.log('true')
-        //const { firebase } = AppVarible.appVarible
         // const credential =  firebase.auth.GoogleAuthProvider.credential(result.idToken, result.accessToken); 
-        const { email, photoUrl } = result.user 
-        this.setState({ email, picUrl: photoUrl })
-        this.checkToSignIn()
+        const { email, photoUrl } = result.user
+        this.checkToSignIn(email, photoUrl)
         return result.accessToken;
         //return firebase.auth().signInWithCredential(credential)
       } else {
-        return {cancelled: true};
+        return { cancelled: true };
       }
-    } catch(e) {
-      return {error: true};
+    } catch (e) {
+      return { error: true };
     }
-  } 
-
-  checkToSignIn = () => {
-    let userID = this.state.email.split('.').join('') 
-    AppVarible.setLogOn('userID',userID)
-    this.getCurrentUser(userID) 
   }
 
-  getCurrentUser = (userID) => {
-    const { firebase } = AppVarible.appVarible
-    const dbCon = firebase.database().ref('User');
-    dbCon.on('value', snapshot => {
-      var users = snapshot.val();
-      console.log(users)
-      console.log(users[userID])
-      let nextPage = this.checkCurrentUser(users[userID])
-      this.props.navigation.navigate(nextPage)
-    })
-  }
-
-  checkCurrentUser = (currentUser) => {
-    const { firebase, logOn: { userID } } = AppVarible.appVarible
-    const dbCon = firebase.database().ref('User');
-    const { email, picUrl } = this.state 
-    console.log('currentUser',currentUser)
+  checkToSignIn = async (email, photoUrl) => {
+    const userID = email.split('.').join('')
+    currentUser = await this.getCurrentUser(userID)
+    console.log('currentUser', currentUser)
+    const { navigate } = this.props.navigation
     if (currentUser) { // มี user นี้ในระบบรึยัง 
       console.log('currentUser true')
-      let subjects = this.getData(currentUser.subjects)
-      AppVarible.setAppVarible('logOn', {
+      // const subjects = this.getData(currentUser.subjects) 
+      navigate('NM', {
         userID,
-        picUrl,
+        photoUrl,
         name: currentUser.name,
         phone: currentUser.phone,
-        email,
-        subjects
       })
-      return 'NM'
     } else {
       console.log('currentUser flase')
-      dbCon.child(userID).set({
-        picUrl,
+      firebase.database().ref('User').child(userID).set({
+        photoUrl,
         email
       })
       AppVarible.setLogOn('picUrl', picUrl)
       AppVarible.setLogOn('email', email)
-      return 'Register'
+      navigate('NM', {
+        userID,
+        photoUrl
+      })
     }
   }
+
+  getCurrentUser = (userID) => new Promise((resolve, reject) => {
+    firebase.database().ref('/User').child(userID).on('value', snapshot => {
+      console.log(snapshot.val())
+      resolve(snapshot.val());
+    })
+  })
 
   getData(values) { // { [] } => [{}]
     let dataVal = values;
     // ไม่ค่อยเข้าใจ (ที่พี่ลัชสอนในห้อง)
     let data = _(dataVal)
-        .keys()
-        .map(dataKey => {
-            let cloned = _.clone(dataVal[dataKey]);
-            cloned.key = dataKey;
-            return cloned;
-        }).value();
+      .keys()
+      .map(dataKey => {
+        let cloned = _.clone(dataVal[dataKey]);
+        cloned.key = dataKey;
+        return cloned;
+      }).value();
     return data
-}
+  }
 
   render() {
     const { navigate } = this.props.navigation;
-    const { deviceHeight, deviceWidth } = this.state
-    if (!AppVarible.appVarible.navigationSaved.login.status) {
-      AppVarible.setNavigation('login',{
-        status: true,
-        navigate
-      })
-    }
+    const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
     return (
       <View style={styles.container}>
-        <View style={[styles.logo, { 
+        <View style={[styles.logo, {
           height: 0.5 * deviceHeight,
-          width: deviceWidth 
-          }]}>
+          width: deviceWidth
+        }]}>
           <Image source={require('../pics/logo.png')} style={{ height: 8 / 21 * deviceHeight, width: 320 / 367 * 8 / 21 * deviceHeight }} />
         </View>
         {/*<Text> {Dimensions.get('window').height} {Dimensions.get('window').width} </Text>
         <Text> {deviceHeight} {deviceWidth} </Text>*/}
         <View style={styles.form}>
-        <TouchableOpacity onPress={() => { this.signInWithGoogleAsync()  }} style={[styles.loginButton, {
-                height: 1 / 10 * deviceHeight,
-                width: 0.6 * deviceWidth,
-                borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-              }]} >
-                <Text style={[styles.loginButtonText, {
-                  fontSize: 1 / 20 * deviceHeight
-                }]} >
-                  เข้าสู่ระบบ
+          <TouchableOpacity onPress={() => { this.signInWithGoogleAsync() }} style={[styles.loginButton, {
+            height: 1 / 10 * deviceHeight,
+            width: 0.6 * deviceWidth,
+            borderRadius: 1 / 3 * 1 / 10 * deviceHeight
+          }]} >
+            <Text style={[styles.loginButtonText, {
+              fontSize: 1 / 20 * deviceHeight
+            }]} >
+              เข้าสู่ระบบ
                 </Text>
-              </TouchableOpacity>
+          </TouchableOpacity>
         </View>
-        <Button title='By Pass' onPress={() => {  navigate('NM') }} />
+        <Button title='By Pass' onPress={() => { console.log('login', this.props.navigation), navigate('NM') }} />
       </View>
     );
   }
@@ -181,13 +163,13 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center'
     //backgroundColor: '#ffb',
   },
   loginButton: {
     justifyContent: 'center',
-    alignItems: 'center', 
+    alignItems: 'center',
     position: 'absolute',
     backgroundColor: '#0070C0'
   },

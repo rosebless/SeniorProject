@@ -129,12 +129,12 @@ return (
     style={styles.statusIcon} 
     />
     {/*<TouchableOpacity style={styles.url} onPress={this._handlePressUrl}>*/ /*}
-  <Text numberOfLines={1} style={styles.codeText}>
-    {this.state.lastScannedCode}
-  </Text>
+<Text numberOfLines={1} style={styles.codeText}>
+{this.state.lastScannedCode}
+</Text>
 {/*</TouchableOpacity>
 <TouchableOpacity 
-  style={styles.cancelButton}
+style={styles.cancelButton}
 onPress={this._handlePressCancel}>*/ /*} 
   <Text style={styles.successText}> {outputText} </Text> 
 {/*</TouchableOpacity>*/ /*}
@@ -209,27 +209,30 @@ borderRadius: 1/2*1/10*deviceHeight,
 import React from 'react';
 import { Alert, Linking, Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, TouchableOpacity, Button, Image, Animated } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
-import AppVarible from '../../../Model/AppVarible' 
+import AppVarible from '../../../Model/AppVarible'
+import firebase from '../../../config/firebase'
 
 export default class Scanner extends React.Component {
   constructor(props) {
     super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
     this.state = {
-      deviceHeight,
-      deviceWidth,
       hasCameraPermission: null,
       lastScannedCode: null,
       students: [],
-      studentsText: '',
-      statusIcon: require('../../../pics/temp5.png') ,
-      statusOutput: 'eiei' ,
-      offsetY: new Animated.Value(0) 
+      studentsInClass: [],
+      statusIcon: require('../../../pics/temp5.png'),
+      statusOutput: 'eiei',
+      offsetY: new Animated.Value(0)
     }
   }
   static navigationOptions = ({ navigation }) => ({
     header: false,
   });
+
+  componentWillMount = () => {
+    this.getStudentFormFirebase()
+  }
+
 
   componentDidMount() {
     this._requestCameraPermission();
@@ -246,26 +249,35 @@ export default class Scanner extends React.Component {
     if (result.data !== this.state.lastScannedCode) {
       LayoutAnimation.spring();
       this.setState({ lastScannedCode: result.data });
+      this.attendance = (result.data)
+    };
+  }
 
-      if (true) { //ตรวจสอบรายชื่อ 
-        let students = this.state.students 
-        students.push(result.data) 
-        this.setState({
-          statusIcon: require('../../../pics/temp5.png'),
-          statusOutput: 'สำเร็จ',
-          students,
-          //studentsText
-        })
-      } else {
-        this.setState({
-          statusIcon: require('../../../pics/temp4.png'),
-          statusOutput: 'ไม่สำเร็จ'
-        })
-      }
-
+  attendance = (student) => {
+    console.log(this.isInClass(student))
+    if (this.isInClass(student)) { //ตรวจสอบรายชื่อ  
+      console.log('true')
+      let students = this.state.students
+      students.push(student)
+      this.setState({
+        statusIcon: require('../../../pics/temp5.png'),
+        statusOutput: 'สำเร็จ',
+        students,
+        //studentsText
+      })
+    } else {
+      console.log('false')
+      this.setState({
+        statusIcon: require('../../../pics/temp4.png'),
+        statusOutput: 'ไม่สำเร็จ'
+      })
+    }
+    // Animation output 
+    if (this.props.navigation.state.params.attendance) {
+      const { deviceHeight } = this.props.screenProps.deviceSize
       Animated.sequence([
         Animated.timing(this.state.offsetY, {
-          toValue: 1 / 10 * this.state.deviceHeight,
+          toValue: 1 / 10 * deviceHeight,
           duration: 1000
         }),
         Animated.timing(this.state.offsetY, {
@@ -275,10 +287,35 @@ export default class Scanner extends React.Component {
         })
       ]).start();
     }
-  };
-  
+
+  }
+
+
+  isInClass = (student) => {
+    const { studentsInClass } = this.state
+    return studentsInClass.some(studentInClass => {
+      return student === studentInClass
+    })
+  }
+
+  getStudentFormFirebase = () => {
+    const { focus: { id } } = this.props.navigation.state.params
+    firebase.database().ref('/Subject').child(id).child('students').on('value', snapshot => {
+      // console.log(snapshot.val())
+      const studentsInClass = Object.keys(snapshot.val())
+      // console.log(studentsInClass)
+      this.setState({ studentsInClass })
+    })
+  }
+
+  manualButton = () => {
+    const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
+    const { studentsInClass } = this.state
+    navigate('ManualAttendance', { deviceSize, studentsInClass, focus, attendance: this.attendance })
+  }
+
   _handlePressSummit = () => {
-    let result = '' 
+    let result = ''
     // for(let i = 1 ; i < this.state.students.length ; i++){
     //   if(i!=this.state.students.length-1) {
     //     result = result + this.state.students[i] + '\n'
@@ -289,21 +326,21 @@ export default class Scanner extends React.Component {
     this.state.students.forEach(s => {
       result = result + s + '\n'
     });
-    result = result.substring(0,result.length-1)
+    result = result.substring(0, result.length - 1)
     Alert.alert(
-      'ยืนยันการเช็คชื่อ ?' , 
-      result ,
+      'ยืนยันการเช็คชื่อ ?',
+      result,
       [
         { text: 'ใช่', onPress: () => { AppVarible.appVarible.navigationSaved.scanning.navigate('ByPassToDashboard') } },
         { text: 'ไม่ใช่', onPress: () => { } },
-      ] ,
-      { cancellable: false } 
+      ],
+      { cancellable: false }
     )
- 
+
   };
 
   _handleShowStudentList = () => {
-    this.state.students.forEach(student => {this.studentsText = this.studentsText + student + '\n'})
+    this.state.students.forEach(student => { this.studentsText = this.studentsText + student + '\n' })
   };
 
   _handlePressCancel = () => {
@@ -315,8 +352,7 @@ export default class Scanner extends React.Component {
   };
 
   render() {
-    const { navigate } = this.props.navigation;
-    const { deviceHeight, deviceWidth } = this.state
+    const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
     let animeteStyle = { transform: [{ translateY: this.state.offsetY }] }
     return (
       <View style={styles.container}>
@@ -334,17 +370,17 @@ export default class Scanner extends React.Component {
                 height: deviceHeight,
                 width: deviceWidth,
                 marginTop: 0
-              }} 
-              barCodeTypes={[BarCodeScanner.Constants.BarCodeType.code39]} 
+              }}
+              barCodeTypes={[BarCodeScanner.Constants.BarCodeType.code39]}
             >
 
               <View style={styles.backgroundTop} />
-              <View style={styles.backgroundTCenter} > 
-                {/* <View style={styles.backgroundTCenterLeft} /> 
+              <View style={styles.backgroundCenter} >
+                {/* <View style={styles.backgroundCenterLeft} /> 
                 <View style={[styles.backgroundScanBox, { height: 3/20 * deviceHeight }]} />
-                <View style={styles.backgroundTCenterRight} />  */}
+                <View style={styles.backgroundCenterRight} />  */}
               </View>
-              <View style={styles.backgroundBot} /> 
+              <View style={styles.backgroundBot} />
 
               <Animated.View style={[styles.topBar, animeteStyle, { height: 1 / 10 * deviceHeight, top: -1 / 10 * deviceHeight }]}>
                 <Image
@@ -360,26 +396,40 @@ export default class Scanner extends React.Component {
                 <Text style={[styles.successText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight }]}>
                   {this.state.statusOutput}
                 </Text>
-              </Animated.View> 
+              </Animated.View>
 
               <View style={[styles.countStudents, {
                 height: 1 / 10 * deviceHeight,
-                width: 2 / 3 * deviceWidth - ( 3 / 10 * deviceWidth ) ,
+                width: 2 / 3 * deviceWidth - (3 / 10 * deviceWidth),
                 left: 1 / 10 * deviceWidth,
-                bottom: 1 / 10 * deviceHeight
+                bottom: 2 / 10 * deviceHeight
               }]} >
-                <Text style={[styles.countStudentsText, { 
+                <Text style={[styles.countStudentsText, {
                   fontSize: 1 / 30 * deviceHeight
                 }]} >
                   จำนวน {this.state.students.length} คน
                 </Text>
               </View>
 
+              <TouchableOpacity onPress={() => { this.manualButton() }} style={[styles.summitButton, {
+                height: 1 / 10 * deviceHeight,
+                width: 2 / 3 * deviceWidth - 3 / 20 * deviceWidth,
+                left: 1 / 20 * deviceWidth,
+                bottom: 1.5 / 20 * deviceHeight,
+                borderRadius: 1 / 3 * 1 / 10 * deviceHeight
+              }]} >
+                <Text style={[styles.summitButtonText, {
+                  fontSize: 1 / 20 * deviceHeight
+                }]} >
+                  กรอกรหัส
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity onPress={() => { this._handlePressSummit() }} style={[styles.summitButton, {
                 height: 1 / 10 * deviceHeight,
                 width: 1 / 3 * deviceWidth,
-                right: 1 / 10 * deviceWidth,
-                bottom: 1 / 10 * deviceHeight,
+                right: 1 / 20 * deviceWidth,
+                bottom: 1.5 / 20 * deviceHeight,
                 borderRadius: 1 / 3 * 1 / 10 * deviceHeight
               }]} >
                 <Text style={[styles.summitButtonText, {
@@ -414,40 +464,7 @@ export default class Scanner extends React.Component {
       </View>
     );
   }
-
-  _maybeRenderUrl = () => {
-    if (!this.state.lastScannedCode) {
-      return;
-    }
-    
-    if (this.state.lastScannedCode) { //ตรวจสอบรายชื่อ 
-      this.setState({
-        statusIcon: '../../../pics/temp5.png',
-        statusOutput: 'สำเร็จ',
-        students: [...this.state.students, this.state.lastScannedCode]
-
-      })
-    } else {
-      this.setState({
-        statusIcon: '../../../pics/temp4.png',
-        statusOutput: 'ไม่สำเร็จ'
-      })
-    }
-    
-    Animated.sequence([
-      Animated.timing(this.state.offsetY, {
-        toValue: 1 / 10 * this.state.deviceHeight,
-        duration: 500
-      }),
-      Animated.timing(this.state.offsetY, {
-        toValue: 0,
-        duration: 500,
-        delay: 500
-      })
-    ]).start(); 
-
-  };
-} 
+}
 
 const backgroundScanerColor = 'rgba(0,0,0,0.7)'
 
@@ -482,10 +499,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     color: '#000',
-  }, 
+  },
   countStudents: {
     justifyContent: 'center',
-    alignItems: 'center', 
+    alignItems: 'center',
     position: 'absolute',
   },
   countStudentsText: {
@@ -495,7 +512,7 @@ const styles = StyleSheet.create({
   },
   summitButton: {
     justifyContent: 'center',
-    alignItems: 'center', 
+    alignItems: 'center',
     position: 'absolute',
     backgroundColor: '#0070C0'
   },
@@ -506,21 +523,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   backgroundTop: {
-    flex: 6, 
-    backgroundColor:  backgroundScanerColor, 
+    flex: 6,
+    backgroundColor: backgroundScanerColor,
   },
-  backgroundTCenter: {
-    flex: 5, 
+  backgroundCenter: {
+    flex: 5,
     flexDirection: 'row',
     //backgroundColor:  'transparent', 
-    justifyContent: 'center', 
-    alignItems: 'center' ,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#fff',
   },
-  backgroundTCenterLeft: {
+  backgroundCenterLeft: {
     flex: 1,
-    backgroundColor:  'blue',
+    backgroundColor: 'blue',
   },
   backgroundScanBox: {
     flex: 8,
@@ -528,12 +545,12 @@ const styles = StyleSheet.create({
     //borderWidth: 1,
     //borderColor: '#fff',
   },
-  backgroundTCenterRight: {
+  backgroundCenterRight: {
     flex: 1,
-    backgroundColor:  backgroundScanerColor,
+    backgroundColor: backgroundScanerColor,
   },
   backgroundBot: {
-    flex: 9, 
-    backgroundColor:  backgroundScanerColor, 
+    flex: 9,
+    backgroundColor: backgroundScanerColor,
   }
 });

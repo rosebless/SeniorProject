@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'react-native';
 import AppVarible from '../Model/AppVarible'
+import firebase from '../config/firebase'
 
 export default class Register extends React.Component {
 
   constructor(props) {
     super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
     this.state = {
-      deviceHeight,
-      deviceWidth,
       name: '',
       phone: ''
     }
@@ -27,17 +25,21 @@ export default class Register extends React.Component {
   */
 
   submitRegister = () => {
-    const { name, phone } = this.state 
-    AppVarible.setLogOn('name',name) 
-    AppVarible.setLogOn('phone',phone) 
-    const { firebase, logOn: { userID } } = AppVarible.appVarible 
-    firebase.database().ref('User').child(userID).child('name').set(name)  
-    firebase.database().ref('User').child(userID).child('phone').set(phone) 
-    this.props.navigation.navigate('NM')
+    const { name, phone } = this.state
+    const { userID, photoUrl } = this.props.navigation.state.params
+    // const { firebase, logOn: { userID } } = AppVarible.appVarible  
+    firebase.database().ref('User').child(userID).child('name').set(name)
+    firebase.database().ref('User').child(userID).child('phone').set(phone)
+    this.props.navigation.navigate('NM', {
+      userID,
+      photoUrl,
+      name,
+      phone
+    })
   }
 
   render() {
-    const { deviceHeight, deviceWidth } = this.state
+    const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
     return (
       <View style={styles.container} >
         <View style={[styles.header, {
@@ -82,11 +84,11 @@ export default class Register extends React.Component {
         <TouchableOpacity onPress={() => this.submitRegister()}
           style={[styles.summitButton, {
             height: 1 / 10 * deviceHeight,
-            width: 0.6*deviceWidth,
+            width: 0.6 * deviceWidth,
             bottom: 1 / 20 * deviceHeight,
             borderRadius: 1 / 3 * 1 / 10 * deviceHeight
           }]} >
-          <Text style={[styles.summitButtonText,{ fontSize: 1 / 20 * deviceHeight }]} > ยืนยัน </Text>
+          <Text style={[styles.summitButtonText, { fontSize: 1 / 20 * deviceHeight }]} > ยืนยัน </Text>
         </TouchableOpacity>
       </View>
     );

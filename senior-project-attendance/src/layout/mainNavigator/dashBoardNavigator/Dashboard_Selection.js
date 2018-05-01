@@ -11,23 +11,14 @@ export default class ScanningPage extends React.Component {
   render() {
     
    const { navigate } = this.props.navigation;
-    
-   if (!AppVarible.appVarible.navigationSaved.dashboard.status) {
-    AppVarible.setNavigation('dashboard',{
-      status: true,
-      navigate 
-    })
-  }
 
     return (
       <SelectionPage 
       screenProps={{ 
+        ...this.props.screenProps, // deviceSize , userID, drawerNavigate
           namePage: 'สรุป' , 
           customNavigate: navigate , 
-          screenNavigate: 'Dashboard' , 
-          focusVarible: (subjectCode) => { 
-            AppVarible.setNavigationFocus( 'dashboard', subjectCode )
-          }
+          screenNavigate: 'Dashboard' 
         }} />
     );
   }

@@ -13,8 +13,9 @@ export default class SubjectItem extends React.Component {
     }
 
     render() {
-        const { mode, subject: { name, addedTime }, height, width, cancelSelection, index } = this.props
+        const { mode, subject: { name, addedTime }, height, width, cancelSelection, id } = this.props
         const heightAndWidth = 0.08 * 16.25 / 19 * height
+        console.log('id', id)
         return (
             // this.props.history.push('/page-2')
             <div >
@@ -37,7 +38,7 @@ export default class SubjectItem extends React.Component {
                                 <img src={require('../photo/cancelButton.png')} // onClick={ (index) => {cancelSelect(index)} } 
                                     style={{
                                         height: heightAndWidth, width: heightAndWidth
-                                    }} onClick={()=>{cancelSelection(index)}}
+                                    }} onClick={() => { cancelSelection(id) }}
                                 />
                             </div>
                         )
@@ -61,10 +62,10 @@ export default class SubjectItem extends React.Component {
 SubjectItem.propTypes = {
     subject: PropType.object.isRequired,
     mode: PropType.string.isRequired,
-    index: PropType.number.isRequired,
+    id: PropType.string.isRequired,
     cancelSelection: PropType.func
-} 
+}
 
 SubjectItem.defualtType = {
-    cancelSelection: () => {}
+    cancelSelection: () => { }
 }
