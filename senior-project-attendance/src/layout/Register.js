@@ -26,16 +26,22 @@ export default class Register extends React.Component {
 
   submitRegister = () => {
     const { name, phone } = this.state
-    const { userID, photoUrl } = this.props.navigation.state.params
-    // const { firebase, logOn: { userID } } = AppVarible.appVarible  
-    firebase.database().ref('User').child(userID).child('name').set(name)
-    firebase.database().ref('User').child(userID).child('phone').set(phone)
-    this.props.navigation.navigate('NM', {
-      userID,
-      photoUrl,
-      name,
-      phone
+    const { professorID, photoUrl } = this.props.navigation.state.params
+    // const { firebase, logOn: { professorID } } = AppVarible.appVarible  
+    firebase.database().ref('Professor').on('value', snapshot => {
+      const result = snapshot.val()
+      const key = Object.keys(result).filter(key => result[key].professorID == professorID)
+      firebase.database().ref('Professor').child(key).child('name').set(name)
+      firebase.database().ref('Professor').child(key).child('phone').set(phone)
+      this.props.navigation.navigate('NM', {
+        professorID,
+        photoUrl,
+        name,
+        phone
+      })
     })
+    // firebase.database().ref('User').child(professorID).child('phone').set(phone)
+
   }
 
   render() {

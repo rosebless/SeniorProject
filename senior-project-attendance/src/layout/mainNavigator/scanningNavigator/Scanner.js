@@ -221,6 +221,7 @@ export default class Scanner extends React.Component {
       students: [],
       studentsInClass: [],
       statusIcon: require('../../../pics/temp5.png'),
+      statusColor: 'white',
       statusOutput: 'eiei',
       offsetY: new Animated.Value(0)
     }
@@ -249,52 +250,67 @@ export default class Scanner extends React.Component {
     if (result.data !== this.state.lastScannedCode) {
       LayoutAnimation.spring();
       this.setState({ lastScannedCode: result.data });
-      this.attendance = (result.data)
+      this.attendance(result.data)
     };
   }
 
   attendance = (student) => {
     console.log(this.isInClass(student))
-    if (this.isInClass(student)) { //ตรวจสอบรายชื่อ  
-      console.log('true')
-      let students = this.state.students
-      students.push(student)
+    if (this.isInClass(student) && !this.isDuplicate(student)) { //ตรวจสอบรายชื่อ  
+      // console.log('true')
+      this.updateStudens(student)
       this.setState({
-        statusIcon: require('../../../pics/temp5.png'),
-        statusOutput: 'สำเร็จ',
-        students,
+        // statusIcon: require('../../../pics/temp5.png'), 
+        statusColor: '#3eee26',
+        statusOutput: 'สำเร็จ'
         //studentsText
       })
-    } else {
-      console.log('false')
+    } else if (this.isDuplicate(student)) {
       this.setState({
-        statusIcon: require('../../../pics/temp4.png'),
+        // statusIcon: require('../../../pics/temp4.png'), 
+        statusColor: '#ffc000',
+        statusOutput: 'ข้อมูลซ้ำ'
+      })
+    } else {
+      // console.log('false')
+      this.setState({
+        // statusIcon: require('../../../pics/temp4.png'),
+        statusColor: '#ff0000',
         statusOutput: 'ไม่สำเร็จ'
       })
     }
     // Animation output 
-    if (this.props.navigation.state.params.attendance) {
-      const { deviceHeight } = this.props.screenProps.deviceSize
-      Animated.sequence([
-        Animated.timing(this.state.offsetY, {
-          toValue: 1 / 10 * deviceHeight,
-          duration: 1000
-        }),
-        Animated.timing(this.state.offsetY, {
-          toValue: 0,
-          duration: 1000,
-          delay: 1000
-        })
-      ]).start();
-    }
-
+    const { deviceHeight } = this.props.screenProps.deviceSize
+    Animated.sequence([
+      Animated.timing(this.state.offsetY, {
+        toValue: 1 / 10 * deviceHeight,
+        duration: 1000
+      }),
+      Animated.timing(this.state.offsetY, {
+        toValue: 0,
+        duration: 1000,
+        delay: 1000
+      })
+    ]).start();
   }
 
+  updateStudens = (student) => {
+    let students = this.state.students
+    students.push(student)
+    this.setState({ students })
+  }
 
   isInClass = (student) => {
     const { studentsInClass } = this.state
     return studentsInClass.some(studentInClass => {
       return student === studentInClass
+    })
+  }
+
+  isDuplicate = (student) => {
+    const { students } = this.state
+    return students.some(studentChecked => {
+      return student === studentChecked
     })
   }
 
@@ -311,11 +327,11 @@ export default class Scanner extends React.Component {
   manualButton = () => {
     const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
     const { studentsInClass } = this.state
-    navigate('ManualAttendance', { deviceSize, studentsInClass, focus, attendance: this.attendance })
+    navigate('ManualAttendance',
+      { deviceSize, studentsInClass, focus, isInClass: this.isInClass, isDuplicate: this.isDuplicate, updateStudens: this.updateStudens })
   }
 
-  _handlePressSummit = () => {
-    let result = ''
+  summitButton = () => {
     // for(let i = 1 ; i < this.state.students.length ; i++){
     //   if(i!=this.state.students.length-1) {
     //     result = result + this.state.students[i] + '\n'
@@ -323,21 +339,67 @@ export default class Scanner extends React.Component {
     //     result = result + this.state.students[i] 
     //   }
     // }
-    this.state.students.forEach(s => {
+    let result = ''
+    const { students } = this.state
+    students.forEach(s => {
       result = result + s + '\n'
     });
-    result = result.substring(0, result.length - 1)
+    const date = this.getDay()
+    const title = `วันที่ ${date} จำนวนนักศึกษาที่เรียน ${students.length} คน`
+    result = result.substring(0, result.length - 1) 
+    const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
     Alert.alert(
-      'ยืนยันการเช็คชื่อ ?',
+      title,
       result,
       [
-        { text: 'ใช่', onPress: () => { AppVarible.appVarible.navigationSaved.scanning.navigate('ByPassToDashboard') } },
+        { text: 'ใช่', onPress: () => { navigate('ByPassToDashboard',{deviceSize, focus}) } },
         { text: 'ไม่ใช่', onPress: () => { } },
       ],
       { cancellable: false }
     )
 
   };
+
+  getDay = () => {
+    var options = { year: '2-digit', month: 'short', day: 'numeric' } // year: 'long'
+    return new Date().toLocaleDateString('th-TH', options)
+  }
+
+  getTime = () => {
+    var dateAll, date, month, year, TimeType, hour, minutes, seconds, fullTime;
+    dateAll = new Date();
+    date = dateAll.getDate();
+    month = dateAll.getMonth();
+    year = dateAll.getFullYear();
+    hour = dateAll.getHours();
+    if (hour <= 11) {
+      TimeType = 'AM';
+    } else {
+      TimeType = 'PM';
+    }
+
+    if (hour > 12) {
+      hour = hour - 12;
+    }
+    if (hour == 0) {
+      hour = 12;
+    }
+
+    minutes = dateAll.getMinutes();
+    if (minutes < 10) {
+      minutes = '0' + minutes.toString();
+    }
+
+    seconds = dateAll.getSeconds();
+    if (seconds < 10) {
+      seconds = '0' + seconds.toString();
+    }
+
+    fullTime = date.toString() + '/' + month.toString() + '/' + year.toString()
+      + hour.toString() + ':' + minutes.toString() + ':' + seconds.toString() + ' ' + TimeType.toString();
+
+    return fullTime
+  }
 
   _handleShowStudentList = () => {
     this.state.students.forEach(student => { this.studentsText = this.studentsText + student + '\n' })
@@ -353,13 +415,14 @@ export default class Scanner extends React.Component {
 
   render() {
     const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
+    const { hasCameraPermission, lastScannedCode, students, statusColor, statusOutput } = this.state
     let animeteStyle = { transform: [{ translateY: this.state.offsetY }] }
     return (
       <View style={styles.container}>
 
-        {this.state.hasCameraPermission === null
+        {hasCameraPermission === null
           ? <Text>กำลังขออนุญาตจากกล้อง</Text>
-          : this.state.hasCameraPermission === false
+          : hasCameraPermission === false
             ? <Text style={{ color: '#fff' }}>
               ไม่ได้รับอนุญาตจากกล้อง
                     </Text>
@@ -382,19 +445,23 @@ export default class Scanner extends React.Component {
               </View>
               <View style={styles.backgroundBot} />
 
-              <Animated.View style={[styles.topBar, animeteStyle, { height: 1 / 10 * deviceHeight, top: -1 / 10 * deviceHeight }]}>
-                <Image
+              <Animated.View style={[styles.topBar, animeteStyle, {
+                height: 1 / 10 * deviceHeight,
+                top: -1 / 10 * deviceHeight,
+                backgroundColor: statusColor
+              }]}>
+                {/* <Image
                   source={this.state.statusIcon}
                   style={[styles.statusIcon, {
                     height: 1 / 10 * 7 / 10 * deviceHeight,
                     width: 1 / 10 * 7 / 10 * deviceHeight,
                   }]}
-                />
+                /> */}
                 <Text numberOfLines={1} style={[styles.codeText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight }]}>
-                  {this.state.lastScannedCode}
+                  {lastScannedCode}
                 </Text>
                 <Text style={[styles.successText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight }]}>
-                  {this.state.statusOutput}
+                  {statusOutput}
                 </Text>
               </Animated.View>
 
@@ -407,7 +474,7 @@ export default class Scanner extends React.Component {
                 <Text style={[styles.countStudentsText, {
                   fontSize: 1 / 30 * deviceHeight
                 }]} >
-                  จำนวน {this.state.students.length} คน
+                  จำนวน {students.length} คน
                 </Text>
               </View>
 
@@ -425,7 +492,7 @@ export default class Scanner extends React.Component {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => { this._handlePressSummit() }} style={[styles.summitButton, {
+              <TouchableOpacity onPress={() => { this.summitButton() }} style={[styles.summitButton, {
                 height: 1 / 10 * deviceHeight,
                 width: 1 / 3 * deviceWidth,
                 right: 1 / 20 * deviceWidth,

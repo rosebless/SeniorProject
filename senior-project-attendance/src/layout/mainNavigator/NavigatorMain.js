@@ -14,9 +14,34 @@ export default class NavigatorMain extends React.Component {
 
   constructor(props) {
     super(props)
-    const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl } } } } = this.props
+    this.state = { activeItemKey: undefined }
+    // const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl } } } } = this.props
+    // const drawerWidth = 0.75 * deviceSize.deviceWidth
+  }
+
+  setActiveItemKey = (key) => {
+    this.setState({
+      activeItemKey: key
+    })
+  }
+
+  removeActiveItemKey = () => {
+    this.setState({
+      activeItemKey: undefined
+    })
+  }
+
+  static navigationOptions = ({ navigation }) => ({
+    title: 'NM'
+  })
+
+  render() { 
+    console.log('NM', this.props)
+    const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl, ...rest } } } } = this.props // rest = { professorID, name }
+    // const { ...params } = this.props.navigation.state.params // professorID, photoUrl, name, phone 
     const drawerWidth = 0.75 * deviceSize.deviceWidth
-    this.DNMainPage = DrawerNavigator({
+    const { activeItemKey } = this.state
+    const DNMainPage = DrawerNavigator({
       Main: {
         screen: MainPage
       },
@@ -35,7 +60,7 @@ export default class NavigatorMain extends React.Component {
     }, {
         initialRouteName: 'Main',
         drawerWidth,
-        contentComponent: props => <CustomDrawer screenProps={{ deviceSize, drawerWidth, goBack, name, photoUrl, drawerProps: { ...props } }} />,
+        contentComponent: props => <CustomDrawer screenProps={{ deviceSize, drawerWidth, goBack, name, photoUrl, drawerProps: activeItemKey ? { ...props, activeItemKey } : { ...props } , removeActiveItemKey: this.removeActiveItemKey }} />,
         drawerOpenRoute: 'DrawerOpen',
         drawerCloseRoute: 'DrawerClose',
         drawerToggleRoute: 'DrawerToggle',
@@ -46,20 +71,9 @@ export default class NavigatorMain extends React.Component {
           gesturesEnabled: false
         }
       });
-  }
-
-
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'NM'
-  })
-
-  render() {
-    const { deviceSize } = this.props.screenProps
-    const { ...params } = this.props.navigation.state.params // userID, photoUrl, name, phone 
     return (
-      <this.DNMainPage
-        screenProps={{ deviceSize, ...params }}
+      <DNMainPage
+        screenProps={{ deviceSize, name, photoUrl, ...rest, configActiveItemKey: { setActiveItemKey: this.setActiveItemKey, removeActiveItemKey: this.removeActiveItemKey } }}
       />
     );
   }

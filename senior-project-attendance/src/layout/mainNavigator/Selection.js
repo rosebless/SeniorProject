@@ -35,36 +35,74 @@ static navigationOptions = ({ navigation }) => ({
 
 
   getUserSubjectsFormFirebase = () => {
-    const { userID } = this.props.screenProps
-    console.log(userID)
-    firebase.database().ref('/User').child(userID).child('subjects').on('value', snapshot => {
+    const { professorID } = this.props.screenProps
+    console.log(professorID)
+    firebase.database().ref('/User').child(professorID).child('subjects').on('value', snapshot => {
       // console.log(snapshot.val())
       // resolve(snapshot.val()); 
       const objSubject = snapshot.val()
-      const subjects = Object.keys(objSubject).map(key =>
-        key.split('-')[3]
+      const subjects = this.customQuery(objSubject).map((key, index) => {
+        // console.log(index % 4, index)
+        let photoUrl
+        switch (index % 4) {
+          case 1:
+          photoUrl = require('../../pics/temp1.png')
+            break
+          case 2:
+          photoUrl = require('../../pics/temp2.png')
+            break
+          case 3:
+          photoUrl = require('../../pics/temp3.png')
+            break
+          case 4:
+          photoUrl = require('../../pics/temp4.png')
+            break
+        }
+        // console.log(ImageProduct)
+        return key.split('-')[3]
           ? {
             id: key,
             subjectCode: key.split('-')[2],
             subjectName: objSubject[key].name,
             section: key.split('-')[3],
-            ImageProduct: require('../../pics/temp3.png')
-          }
+            photoUrl          }
           : {
             id: key,
             subjectCode: key.split('-')[2],
             subjectName: objSubject[key].name,
-            ImageProduct: require('../../pics/temp3.png')
+            photoUrl
           }
+      }
+
       )
       this.setState({ subjects })
     })
   }
 
+  customQuery = (objSubject) => {
+    const startTerm1 = { month: 7, day: 1 }
+    const startTerm2 = { month: 1, day: 1 }
+    let year, term
+    const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+    const currentYear = parseInt(currentDate.split('/')[2])
+    const currentMonth = parseInt(currentDate.split('/')[1])
+    const currentDay = parseInt(currentDate.split('/')[0])
+    if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+      year = currentYear - 1
+      term = 2
+    } else {
+      year = currentYear
+      term = 1
+    }
+    const currentTerm = [year, term].join('-')
+    console.log('currentTerm', currentTerm)
+    return Object.keys(objSubject).filter(subject => subject.substr(0, 6) == currentTerm)
+  }
+
   render() {
     const {
       deviceSize: { deviceHeight, deviceWidth },
-      userID,
+      professorID,
       drawerNavigate,
       namePage,
       customNavigate,
@@ -89,7 +127,7 @@ static navigationOptions = ({ navigation }) => ({
               }}>
                 <TouchableOpacity
                   onPress={() => {
-                    customNavigate(screenNavigate,{ subjects, focus: item })
+                    customNavigate(screenNavigate, { subjects, focus: item })
                   }} >
                   <View style={{
                     flex: 1,
@@ -102,7 +140,7 @@ static navigationOptions = ({ navigation }) => ({
 
                   }}>
                     <Image
-                      source={item.ImageProduct}
+                      source={item.photoUrl}
                       style={{
                         width: 1 / 10 * 0.8 * deviceHeight, height: 1 / 10 * 0.8 * deviceHeight, margin: 1 / 10 * 0.1 * deviceHeight
                       }} />
@@ -175,8 +213,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'center',
-
   },
   bot: {
     flex: 14,

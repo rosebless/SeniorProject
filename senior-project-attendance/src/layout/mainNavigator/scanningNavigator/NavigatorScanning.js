@@ -22,12 +22,12 @@ export default class NavigatorLogin extends React.Component {
         
       })
   render() {
-    const { deviceSize, userID } = this.props.screenProps 
+    const { deviceSize, professorID, configActiveItemKey } = this.props.screenProps 
     const drawerNavigate = this.props.navigation.navigate
     // @FIX step 1
     // add screenProps
     return (
-        <SNScanning screenProps={{ deviceSize, userID, drawerNavigate }} />
+        <SNScanning screenProps={{ deviceSize, professorID, drawerNavigate, configActiveItemKey }} />
     ); 
   }
 }

@@ -13,7 +13,6 @@ import AppVarible from '../../../Model/AppVarible'
 
 export default class CustomDrawer extends React.Component {
 
-
   static navigationOptions = ({ navigation }) => ({
     title: 'Custom',
   })
@@ -31,15 +30,17 @@ export default class CustomDrawer extends React.Component {
   }
 
   render() {
-    const { screenProps: { drawerProps, drawerWidth }, screenProps: { drawerProps: { items } } } = this.props
-    const { deviceSize:{deviceHeight, deviceWidth}, photoUrl, name } = this.props.screenProps
+    console.log(this.props)
+    // const { drawerProps, drawerWidth } = this.props.screenProps
+    const { drawerProps, drawerWidth, deviceSize: { deviceHeight, deviceWidth }, photoUrl, name, removeActiveItemKey } = this.props.screenProps
     if (deviceHeight < deviceWidth) {
       var profile_height = 3 / 20 * deviceHeight
       var profile_width = 3 / 20 * deviceHeight
     } else {
       var profile_height = 1.5 / 4 * deviceWidth
       var profile_width = 1.5 / 4 * deviceWidth
-    }
+    } 
+    removeActiveItemKey()
     // const { picUrl, name } = AppVarible.appVarible.logOn
     //const itemsmain
     return (
@@ -67,7 +68,7 @@ export default class CustomDrawer extends React.Component {
                 width: profile_width,
                 borderRadius: 1 / 2 * profile_height,
                 borderWidth: 1 / 75 * profile_height,
-                borderColor: '#0070C0', 
+                borderColor: '#0070C0',
                 backgroundColor: '#0070C0'
               }}
             />
@@ -78,7 +79,8 @@ export default class CustomDrawer extends React.Component {
           style={[styles.scrollView, {
             height: 11 / 20 * deviceHeight,
             width: drawerWidth
-          }]}>
+          }]} 
+          >
           <DrawerItems {...drawerProps} />
         </ScrollView>
         <View style={[styles.bottomFixed, {

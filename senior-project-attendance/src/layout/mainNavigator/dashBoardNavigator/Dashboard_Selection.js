@@ -7,7 +7,6 @@ import AppVarible from '../../../Model/AppVarible'
 import SelectionPage from '../Selection'
 
 export default class ScanningPage extends React.Component { 
-  
   render() {
     
    const { navigate } = this.props.navigation;
@@ -15,7 +14,7 @@ export default class ScanningPage extends React.Component {
     return (
       <SelectionPage 
       screenProps={{ 
-        ...this.props.screenProps, // deviceSize , userID, drawerNavigate
+        ...this.props.screenProps, // deviceSize , professorID, drawerNavigate
           namePage: 'สรุป' , 
           customNavigate: navigate , 
           screenNavigate: 'Dashboard' 

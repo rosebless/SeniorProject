@@ -323,7 +323,7 @@ export default class ScanningPage extends React.Component {
     return (
       <SelectionPage 
       screenProps={{  
-          ...this.props.screenProps, // deviceSize , userID, drawerNavigate
+          ...this.props.screenProps, // deviceSize , professorID, drawerNavigate
           namePage: 'เช็คชื่อ' , 
           customNavigate: navigate , 
           screenNavigate: 'Scanner' 

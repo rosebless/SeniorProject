@@ -18,6 +18,7 @@ export default class Login extends React.Component {
       //   picUrl: ''
       // }
     }
+    this.getCurrentUser = this.getCurrentUser.bind(this);
   }
 
   static navigationOptions = ({ navigation }) => ({
@@ -68,40 +69,64 @@ export default class Login extends React.Component {
   }
 
   checkToSignIn = async (email, photoUrl) => {
-    const userID = email.split('.').join('')
-    currentUser = await this.getCurrentUser(userID)
-    console.log('currentUser', currentUser)
+    console.log(this.props)
     const { navigate } = this.props.navigation
-    if (currentUser) { // มี user นี้ในระบบรึยัง 
-      console.log('currentUser true')
+    navigate('NM', {
+      professorID: '' ,
+      photoUrl: '' ,
+      name:  '' ,
+      phone: ''
+    })
+    // const professorID = email
+    // console.log('professorID', professorID)
+    // const currentUser = await this.getCurrentUser(professorID)
+    // // this.getCurrentUser(professorID)
+    // console.log('currentUser', currentUser)
+    // console.log('currentUser', currentUser)
+    // const { navigate } = this.props.navigation
+    // if (currentUser) { // มี user นี้ในระบบรึยัง 
+    //   console.log('currentUser true')
       // const subjects = this.getData(currentUser.subjects) 
-      navigate('NM', {
-        userID,
-        photoUrl,
-        name: currentUser.name,
-        phone: currentUser.phone,
-      })
-    } else {
-      console.log('currentUser flase')
-      firebase.database().ref('User').child(userID).set({
-        photoUrl,
-        email
-      })
-      AppVarible.setLogOn('picUrl', picUrl)
-      AppVarible.setLogOn('email', email)
-      navigate('NM', {
-        userID,
-        photoUrl
-      })
-    }
+      // navigate('NM', {
+      //   professorID: '' ,
+      //   photoUrl: '' ,
+      //   name:  '' ,
+      //   phone: ''
+      // })
+    //   this.props.navigation.push('NM', {
+    //       professorID: '' ,
+    //       photoUrl: '' ,
+    //       name:  '' ,
+    //       phone: ''
+    //     })
+    // } else {
+    // //   console.log('currentUser flase')
+    // //   firebase.database().ref('User').push({
+    // //     photoUrl,
+    // //     professorID
+    // //   })
+    // //   // AppVarible.setLogOn('picUrl', picUrl)
+    // //   // AppVarible.setLogOn('email', email)
+    // //   navigate('NM', {
+    // //     professorID,
+    // //     photoUrl
+    // //   })
+    // }
   }
 
-  getCurrentUser = (userID) => new Promise((resolve, reject) => {
-    firebase.database().ref('/User').child(userID).on('value', snapshot => {
-      console.log(snapshot.val())
-      resolve(snapshot.val());
-    })
+  getCurrentUser(professorID){
+   return new Promise((resolve, reject) => {
+    console.log('professorID', professorID)
+
+    firebase.database().ref('/Professor').once('value', snapshot => {
+      console.log('result', snapshot.val()) 
+      const result = snapshot.val()
+      console.log('professor', result) 
+      const user = result && Object.keys(result).map( key => result[key] ).filter( user => user.professorID == professorID )[0] 
+      resolve(user); 
+    }).catch((e)=> console.log(e) )
   })
+}
 
   getData(values) { // { [] } => [{}]
     let dataVal = values;
@@ -142,7 +167,15 @@ export default class Login extends React.Component {
                 </Text>
           </TouchableOpacity>
         </View>
-        <Button title='By Pass' onPress={() => { console.log('login', this.props.navigation), navigate('NM') }} />
+        <Button title='By Pass' onPress={() => {
+          console.log('login', this.props.navigation)
+          navigate('NM', {
+            professorID: 'swthanisorn2@gmailcom',
+            photoUrl: 'https://lh3.googleusercontent.com/-xu7Nwou87BY/AAAAAAAAAAI/AAAAAAAAHT4/HvL_EeTHvss/photo.jpg',
+            name: 'ธนิสรณ์ ค้าผลดี',
+            phone: '0804515666',
+          })
+        }} />
       </View>
     );
   }
