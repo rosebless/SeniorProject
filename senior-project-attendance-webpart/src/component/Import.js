@@ -1,6 +1,6 @@
 
 // import React from 'react'
-// import { fb } from './Menu'
+// import { firebase } from './Menu'
 // import SubjectList from './SubjectList'
 // import File from 'react-files'
 // import XLSX from 'xlsx'
@@ -162,16 +162,16 @@
 
 //     // upLoad = async (perfectForUpload) => {
 //     //     // console.log(perfectForUpload) 
-//     //     // const dbCon = fb.database().ref('/Subject')
+//     //     // const dbCon = firebase.database().ref('/Subject')
 //     //     const subjectsOld = await this.getOldSubject()
 //     //     const preUpload = { ...subjectsOld, ...perfectForUpload }
-//     //     fb.database().ref('/Subject').set(preUpload)
+//     //     firebase.database().ref('/Subject').set(preUpload)
 //     //     // console.log(preUpload) 
-//     //     // fb.database().ref('/User').child(user)
+//     //     // firebase.database().ref('/User').child(user)
 //     // }
 
 //     // getOldSubject = () => new Promise((resolve, reject) => {
-//     //     fb.database().ref('/Subject').on('value', snapshot => {
+//     //     firebase.database().ref('/Subject').on('value', snapshot => {
 //     //         console.log(snapshot.val())
 //     //         resolve(snapshot.val());
 //     //     })
@@ -450,20 +450,20 @@
 // // // ReactDOM.render(<div><FilesDemo1 /><FilesDemo2 /></div>, document.getElementById('container'))
 
 import React from 'react'
-import { fb } from './Menu'
 import SubjectList from './SubjectList'
 import File from './FileInput'
 import XLSX from 'xlsx'
 import '../css/Import.css'
 import Header from './Header'
-import { resolve } from 'url';
+import firebase from '../config/firebase'
 
 export default class Import extends React.Component {
 
     state = {
         files: [],
         width: 0,
-        height: 0
+        height: 0,
+        subjects: {}
     }
 
     componentDidMount = () => {
@@ -516,10 +516,40 @@ export default class Import extends React.Component {
     }
 
     onInputChange = (files) => {
+        // document.getElementById('summitButton').disabled = true
         this.setState({
             files
         })
         console.log('import', files)
+        // var subjects = {}
+        // var xxx= {};
+        //  files.forEach(file => {
+        //     // const id = file.name.split(' ')
+        //     const reader = new FileReader();
+        //     reader.onload = async (e) => {
+        //         const dataTemp = e.target.result;
+        //         const workbook = XLSX.read(dataTemp, { type: 'binary' });
+        //         const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 'A' });
+        //         const [id, subject] = await this.getDataForFirebase(data)
+        //         // const id = subjectAndID[0] 
+        //         // const subject = subjectAndID[1]  
+        //         console.log('abc', id, subject)
+        //         subjects[id] = subject
+        //         // subjects.push()
+        //         xxx = {
+        //             id: subject
+        //         }
+        //         this.setState({ subjects })
+
+        //         // subjects = xxx
+        //         // debugger
+        //         // console.log(subjects)
+        //         // firebase.database().ref('/Subject2').push(subjects || 'abc')
+        //         console.log('read',this.state.subjects)
+        //     }
+        //     reader.readAsBinaryString(file);
+        // })
+        // document.getElementById('summitButton').disabled = false
     }
 
     cancelSelection = (id) => {
@@ -528,62 +558,165 @@ export default class Import extends React.Component {
         this.refs.fileComponent.removeFile(file)
     }
 
-    submit = () => {
+    submit = async () => {
         const { files } = this.state
         var subjects = {}
-        files.forEach(file => {
-            const id = file.name.split(' ')
+        var xxx = {};
+        files.forEach(async (file) => {
+            // const id = file.name.split(' ')
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 const dataTemp = e.target.result;
                 const workbook = XLSX.read(dataTemp, { type: 'binary' });
                 const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 'A' });
-                const [id, subject] = this.getDataForFirebase(data)
+                const [id, subject] = await this.getDataForFirebase(data)
                 // const id = subjectAndID[0] 
-                // const subject = subjectAndID[1]   
+                // const subject = subjectAndID[1]  
+                console.log('abc', id, subject)
                 subjects[id] = subject
+                // subjects.push()
+                // xxx = {
+                //     id: subject
+                // }
+                // this.setState({ subjects })
+
+                // subjects = xxx
+                // debugger
                 // console.log(subjects)
+                // firebase.database().ref('/Subject2').push(subjects || 'abc')
+                // console.log('read',this.state.subjects)
+
+                console.log(`upload to Subject/${id} `)
+                firebase.database().ref('/Subject').child(id).set(subject)
+                const { professorKey } = this.props.history.location.state
+                console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
+                firebase.database().ref('/Professor').child(professorKey).child('subjects').child(id).set({ name: subject.name })
             }
-            reader.readAsBinaryString(file);
+            await reader.readAsBinaryString(file);
         })
-        this.upload(subjects)
+        // console.log('xxx', xxx)
+        // console.log('subjects', subjects)
+        // await this.upload(subjects).then(() => { console.log('successFully') }).catch((e) => { console.log(e) })
+        // console.log('hello eiei')
         this.refs.fileComponent.removeFiles()
     }
 
+    //          storage 
+    //     _handleImagePicked = async () => {
+    //         let { pickerResult } = this.state;
+
+    //         try {
+    //             this.setState({ uploading: true });
+    //             if (!pickerResult.cancelled) {
+    //                 uploadUrl = await this.uploadImageAsync(pickerResult.uri);
+    //                 this.setState({ image: uploadUrl });
+    //                 const { db } = this.props.screenProps
+    //                 let dbUploaddata = db.database().ref('/Product').child(this.state.id);
+    //                 dbUploaddata.set({
+    //                     id: this.state.id,
+    //                     image: this.state.image,
+    //                     name: this.state.name,
+    //                     detail: this.state.detail,
+    //                     count: this.state.count,
+    //                     countType: this.state.countType,
+    //                 });
+    //             }
+    //         } catch (e) {
+    //             console.log(e);
+    //             alert('คุณทำรายการผิดกรุณาทำรายการใหม่ 😞');
+    //         } finally {
+    //             this.setState({ uploading: false });
+    //         }
+    //     };
+
+    //     async uploadImageAsync(uri) {
+    //         const { db } = this.props.screenProps
+    //         const response = await fetch(uri);
+    //         const blob = await response.blob();
+    //         const ref = db.storage().ref().child(this.state.id);
+    //         const snapshot = await ref.put(blob);
+    //         return snapshot.downloadURL;
+    //     };
+    // }
+
     upload = async (subjects) => {
+        // const { subjects } = this.state
+        console.log('subjects', subjects)
+        console.log('subjects', Object.keys(subjects))
+        // debugger
         // upload to Subject 
+
+        // let subjectR = {
+        //     name: subjects.key.name
+        // }
+        // console.log('subjectR', subjectR)
         const subjectsOld = await this.getOldSubject()
+        console.log('subjectsOld', subjectsOld)
         const preUpload = { ...subjectsOld, ...subjects }
         console.log('subject upload', preUpload)
-        fb.database().ref('/Subject').set(preUpload)
+        await firebase.database().ref('/Subject2').set(preUpload || 'abc').then(() => { console.log('upload subject success', preUpload || 'abc') }).catch(() => { console.log('upload subject  false') })
+        console.log('subjects', subjects)
 
-        // upload to User 
-        const { userID } = this.props.history.location.state
-        const userSubjectsOld = await this.getOldUserSubject(userID)
+        // upload to User  
+        const { professorKey } = this.props.history.location.state
+        const userSubjectsOld = await this.getOldProfessorSubject()
         let userSubjects = {}
-        Object.keys(subjects).forEach(key => {
+        console.log('userSubjects', userSubjects)
+        await Object.keys(subjects).forEach(key => {
+            console.log('key', key)
             userSubjects[key] = { name: subjects[key].name }
         })
-        const preUploadUser = { ...userSubjectsOld, ...userSubjects }
+        console.log('subjects', subjects)
+        console.log('userSubjects', userSubjects)
+        const preUploadUser = await { ...userSubjectsOld, ...userSubjects }
         console.log('user subject upload', preUploadUser)
-        fb.database().ref('/User').child(userID).child('subjects').set(preUploadUser)
+        await firebase.database().ref('/Professor').child(professorKey).child('subjects').set(preUploadUser)
+        console.log('successFull')
     }
 
     getOldSubject = () => new Promise((resolve, reject) => {
-        fb.database().ref('/Subject').on('value', snapshot => {
+        firebase.database().ref('/Subject').once('value').then(snapshot => {
             // console.log(snapshot.val())
             resolve(snapshot.val());
         })
     })
 
-    getOldUserSubject = (userID) => new Promise((resolve, reject) => {
-        fb.database().ref('/User').child(userID).child('subjects').on('value', snapshot => {
+    getOldProfessorSubject = () => new Promise((resolve, reject) => {
+        const { professorKey } = this.props.history.location.state
+        firebase.database().ref('/Professor').child(professorKey).child('subjects').once('value').then(snapshot => {
+            const result = snapshot.val()
+            // console.log('professor', result)
+            resolve(result);
+        })
+        // firebase.database().ref('/Professor').child(key).child('subjects').on('value', snapshot => {
+        //     // console.log(snapshot.val())
+        //     resolve(snapshot.val());
+        // })
+    })
+
+    getOldProfessorInSubject = (key) => new Promise((resolve, reject) => {
+        firebase.database().ref('/Subject').child(key).child('professors').once('value').then(snapshot => {
             // console.log(snapshot.val())
-            resolve(snapshot.val());
+            resolve(snapshot.val() || []);
         })
     })
 
-    getDataForFirebase = (data) => {
+    getProfessorName = () => new Promise((resolve, reject) => {
+        const { professorKey } = this.props.history.location.state
+        firebase.database().ref('/Professor').child(professorKey).once('value').then(snapshot => {
+            const result = snapshot.val()
+            resolve([result.professorID, result.name]);
+        })
+        // firebase.database().ref('/Professor').child(key).child('subjects').on('value', snapshot => {
+        //     // console.log(snapshot.val())
+        //     resolve(snapshot.val());
+        // })
+    })
+
+
+    getDataForFirebase = async (data) => {
+        const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
+        // console.log(professorID, photoUrl)
         const term = data[2]['E'].trim().split(' ')[1]
         const year = data[2]['E'].trim().split(' ')[3]
         const e3split = data[3]['E'].trim().split('  ')
@@ -611,6 +744,14 @@ export default class Import extends React.Component {
         const id = secForId === undefined
             ? [year, term, code].join('-')
             : [year, term, code, secForId].join('-')
+        const professorsOld = await this.getOldProfessorInSubject(id)
+        console.log('sadsdassda', professorKey)
+        const professors = professorsOld
+        professors.push({
+            professorID,
+            name: professorsName,
+            photoUrl
+        })
         const subject = {
             year,
             term,
@@ -618,7 +759,8 @@ export default class Import extends React.Component {
             name,
             count,
             students,
-            countToCheck
+            countToCheck,
+            professors
         }
         return [id, subject]
     }
@@ -674,7 +816,7 @@ export default class Import extends React.Component {
                             height: 0.1 * 16.25 / 19 * height, width: 0.5 * 0.4 * width,
                             borderRadius: 0.02 * 16.25 / 19 * height, marginTop: 0.02 * 16.25 / 19 * height,
                             fontSize: 0.05 * 16.25 / 19 * height
-                        }} >
+                        }} id='summitButton' >
                             ยืนยัน
                         </button>
                     </div >

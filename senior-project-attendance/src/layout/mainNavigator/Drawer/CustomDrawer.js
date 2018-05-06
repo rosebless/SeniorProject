@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { Container, Content, Icon, Header, Body } from 'native-base'
 import { NavigationActions, DrawerItems } from 'react-navigation';
 import { StyleSheet, ScrollView, Text, View, Image, TouchableOpacity } from 'react-native';
-import AppVarible from '../../../Model/AppVarible'
+// import AppVarible from '../../../Model/AppVarible'
 
 export default class CustomDrawer extends React.Component {
 
@@ -18,29 +18,22 @@ export default class CustomDrawer extends React.Component {
   })
 
   logOut = () => {
-    const { goBack } = this.props.screenProps
-    // AppVarible.setAppVarible('navigationSaved', {
-    //   login: { status: false, navigate: '' },
-    //   main: { status: false, navigate: '' },
-    //   subject: { status: false, navigate: '', focus: '' },
-    //   scanning: { status: false, navigate: '', focus: '' },
-    //   dashboard: { status: false, navigate: '', focus: '' }
-    // })
-    goBack()
+    // this.props.navigation.pop()
+    this.props.navigation.navigate('Login')
+    // this.props.navigation.dangerouslyGetParent().goBack() 
   }
 
   render() {
-    console.log(this.props)
+    // console.log('customDrawer', this.props)
     // const { drawerProps, drawerWidth } = this.props.screenProps
-    const { drawerProps, drawerWidth, deviceSize: { deviceHeight, deviceWidth }, photoUrl, name, removeActiveItemKey } = this.props.screenProps
+    const { drawerWidth, screenProps: { deviceSize: { deviceHeight, deviceWidth }, name, photoUrl }, ...props } = this.props
     if (deviceHeight < deviceWidth) {
       var profile_height = 3 / 20 * deviceHeight
       var profile_width = 3 / 20 * deviceHeight
     } else {
       var profile_height = 1.5 / 4 * deviceWidth
       var profile_width = 1.5 / 4 * deviceWidth
-    } 
-    removeActiveItemKey()
+    }
     // const { picUrl, name } = AppVarible.appVarible.logOn
     //const itemsmain
     return (
@@ -79,9 +72,9 @@ export default class CustomDrawer extends React.Component {
           style={[styles.scrollView, {
             height: 11 / 20 * deviceHeight,
             width: drawerWidth
-          }]} 
-          >
-          <DrawerItems {...drawerProps} />
+          }]}
+        >
+          <DrawerItems {...props} />
         </ScrollView>
         <View style={[styles.bottomFixed, {
           height: 3 / 20 * deviceHeight,

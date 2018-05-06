@@ -57,14 +57,15 @@ export default class ManualAttendance extends React.Component {
     }
 
     render() {
-        const { deviceSize: { deviceHeight, deviceWidth }, focus } = this.props.navigation.state.params
+        const { focus } = this.props.navigation.state.params 
+        const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
         const { textOutput, textOutputColor } = this.state
         return (
             <View style={styles.container}>
                 <View style={{ flex: 1 }} />
                 <View style={styles.top}>
                     <Image
-                        source={focus.ImageProduct}
+                        source={focus.photoUrl}
                         style={{
                             height: 1 / 10 * deviceHeight,
                             width: 1 / 10 * deviceHeight,
@@ -82,12 +83,12 @@ export default class ManualAttendance extends React.Component {
                         <Text style={[styles.itemName, {
                             fontSize: 1 / 40 * deviceHeight
                         }]}>
-                            {focus.subjectCode}
+                            {focus.code}
                         </Text>
                         <Text style={[styles.itemDetail, {
                             fontSize: 1 / 40 * deviceHeight
                         }]}>
-                            {focus.subjectName}
+                            {focus.name}
                         </Text>
                         { // condition && expression => if(conditon) expression it is short if without else 
                             focus.section

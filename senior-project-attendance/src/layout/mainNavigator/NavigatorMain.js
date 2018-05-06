@@ -1,79 +1,57 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
-import { Container, Content, Icon, Header, Body } from 'native-base'
-import { DrawerNavigator, NavigationActions, DrawerItems, SafeAreaView } from 'react-navigation';
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import { createDrawerNavigator } from 'react-navigation';
 
-import MainPage from './MainPage'
-import ProfilePage from './ProfilePage'
-import NavigatorSubject from './subjectNavigator/NavigatorSubject'
-import NavigatorScanning from './scanningNavigator/NavigatorScanning'
-import NavigatorDashboard from './dashBoardNavigator/NavigatorDashboard'
+import Main from './MainPage'
+import Profile from './ProfilePage'
+import NSubject from './subjectNavigator/NavigatorSubject'
+import NScanning from './scanningNavigator/NavigatorScanning'
+import NDashboard from './dashBoardNavigator/NavigatorDashboard'
 import CustomDrawer from './Drawer/CustomDrawer'
 
-export default class NavigatorMain extends React.Component {
+let deviceSize = {
+  deviceHeight: Dimensions.get('window').height,
+  deviceWidth: Dimensions.get('window').width
+}
+let drawerWidth = 0.75 * deviceSize.deviceWidth
+const DNMainPage = createDrawerNavigator({
+  Main,
+  Profile,
+  NSubject,
+  NScanning,
+  NDashboard,
+}, {
+    initialRouteName: 'Main',
+    drawerWidth,
+    contentComponent: props => <CustomDrawer {...props} drawerWidth={drawerWidth} />,
+    // drawerOpenRoute: 'DrawerOpen',
+    // drawerCloseRoute: 'DrawerClose',
+    // drawerToggleRoute: 'DrawerToggle',
+    contentOptions: {
+      activeTintColor: 'red',
+    },
+    navigationOptions: {
+      gesturesEnabled: false
+    }
+  });
 
+export default class NavigatorMain extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { activeItemKey: undefined }
-    // const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl } } } } = this.props
-    // const drawerWidth = 0.75 * deviceSize.deviceWidth
+    this.state = {
+      name: this.props.navigation.state.params.name
+    }
   }
-
-  setActiveItemKey = (key) => {
-    this.setState({
-      activeItemKey: key
-    })
-  }
-
-  removeActiveItemKey = () => {
-    this.setState({
-      activeItemKey: undefined
-    })
-  }
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'NM'
-  })
-
-  render() { 
-    console.log('NM', this.props)
-    const { screenProps: { deviceSize }, navigation: { goBack, state: { params: { name, photoUrl, ...rest } } } } = this.props // rest = { professorID, name }
+  static router = DNMainPage.router
+  setNameInScreenProps = (name) => this.setState({ name }) 
+  render() {
+    const { screenProps: { deviceSize }, navigation: { state: { params: { photoUrl, professorKey } } } } = this.props // params = name, photoUrl, professorKey
     // const { ...params } = this.props.navigation.state.params // professorID, photoUrl, name, phone 
-    const drawerWidth = 0.75 * deviceSize.deviceWidth
-    const { activeItemKey } = this.state
-    const DNMainPage = DrawerNavigator({
-      Main: {
-        screen: MainPage
-      },
-      Profile: {
-        screen: ProfilePage
-      },
-      NSubject: {
-        screen: NavigatorSubject
-      },
-      NScanning: {
-        screen: NavigatorScanning
-      },
-      NDashBoard: {
-        screen: NavigatorDashboard
-      },
-    }, {
-        initialRouteName: 'Main',
-        drawerWidth,
-        contentComponent: props => <CustomDrawer screenProps={{ deviceSize, drawerWidth, goBack, name, photoUrl, drawerProps: activeItemKey ? { ...props, activeItemKey } : { ...props } , removeActiveItemKey: this.removeActiveItemKey }} />,
-        drawerOpenRoute: 'DrawerOpen',
-        drawerCloseRoute: 'DrawerClose',
-        drawerToggleRoute: 'DrawerToggle',
-        contentOptions: {
-          activeTintColor: 'red',
-        },
-        navigationOptions: {
-          gesturesEnabled: false
-        }
-      });
+    const { name } = this.state 
+    console.log('this.props.navigation',this.props.navigation)
     return (
-      <DNMainPage
-        screenProps={{ deviceSize, name, photoUrl, ...rest, configActiveItemKey: { setActiveItemKey: this.setActiveItemKey, removeActiveItemKey: this.removeActiveItemKey } }}
+      <DNMainPage navigation={this.props.navigation}
+        screenProps={{ deviceSize, name, photoUrl, professorKey, setNameInScreenProps: this.setNameInScreenProps }}
       />
     );
   }

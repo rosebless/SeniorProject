@@ -209,7 +209,7 @@ borderRadius: 1/2*1/10*deviceHeight,
 import React from 'react';
 import { Alert, Linking, Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, TouchableOpacity, Button, Image, Animated } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
-import AppVarible from '../../../Model/AppVarible'
+// import AppVarible from '../../../Model/AppVarible'
 import firebase from '../../../config/firebase'
 
 export default class Scanner extends React.Component {
@@ -225,13 +225,14 @@ export default class Scanner extends React.Component {
       statusOutput: 'eiei',
       offsetY: new Animated.Value(0)
     }
+    this.getStudentFormFirebase()
   }
   static navigationOptions = ({ navigation }) => ({
     header: false,
   });
 
   componentWillMount = () => {
-    this.getStudentFormFirebase()
+    
   }
 
 
@@ -316,7 +317,7 @@ export default class Scanner extends React.Component {
 
   getStudentFormFirebase = () => {
     const { focus: { id } } = this.props.navigation.state.params
-    firebase.database().ref('/Subject').child(id).child('students').on('value', snapshot => {
+    firebase.database().ref('/Subject').child(id).child('students').once('value', snapshot => {
       // console.log(snapshot.val())
       const studentsInClass = Object.keys(snapshot.val())
       // console.log(studentsInClass)
@@ -325,10 +326,9 @@ export default class Scanner extends React.Component {
   }
 
   manualButton = () => {
-    const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
-    const { studentsInClass } = this.state
+    const {  navigate, state: { params: { focus } } } = this.props.navigation
     navigate('ManualAttendance',
-      { deviceSize, studentsInClass, focus, isInClass: this.isInClass, isDuplicate: this.isDuplicate, updateStudens: this.updateStudens })
+      {  focus, isInClass: this.isInClass, isDuplicate: this.isDuplicate, updateStudens: this.updateStudens })
   }
 
   summitButton = () => {
@@ -348,11 +348,12 @@ export default class Scanner extends React.Component {
     const title = `วันที่ ${date} จำนวนนักศึกษาที่เรียน ${students.length} คน`
     result = result.substring(0, result.length - 1) 
     const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
+    console.log('Scanner focus',focus)
     Alert.alert(
       title,
       result,
       [
-        { text: 'ใช่', onPress: () => { navigate('ByPassToDashboard',{deviceSize, focus}) } },
+        { text: 'ใช่', onPress: () => { navigate('ByPassToDashboard',{focus}) } },
         { text: 'ไม่ใช่', onPress: () => { } },
       ],
       { cancellable: false }

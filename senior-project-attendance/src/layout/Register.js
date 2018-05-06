@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'react-native';
-import AppVarible from '../Model/AppVarible'
 import firebase from '../config/firebase'
 
 export default class Register extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -12,38 +10,18 @@ export default class Register extends React.Component {
       phone: ''
     }
   }
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'Register',
-  })
-  /*
-  static navigationOptions = ({navigation}) => ({
-      title: 'Main',
-      headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
-     
-  })
-  */
-
   submitRegister = () => {
     const { name, phone } = this.state
-    const { professorID, photoUrl } = this.props.navigation.state.params
-    // const { firebase, logOn: { professorID } } = AppVarible.appVarible  
-    firebase.database().ref('Professor').on('value', snapshot => {
-      const result = snapshot.val()
-      const key = Object.keys(result).filter(key => result[key].professorID == professorID)
-      firebase.database().ref('Professor').child(key).child('name').set(name)
-      firebase.database().ref('Professor').child(key).child('phone').set(phone)
-      this.props.navigation.navigate('NM', {
-        professorID,
-        photoUrl,
-        name,
-        phone
-      })
+    const { professorKey, photoUrl } = this.props.navigation.state.params
+    console.log('professorKey', professorKey)
+    firebase.database().ref('Professor').child(professorKey).child('name').set(name)
+    firebase.database().ref('Professor').child(professorKey).child('phone').set(phone)
+    this.props.navigation.navigate('NMain', {
+      professorKey,
+      photoUrl,
+      name
     })
-    // firebase.database().ref('User').child(professorID).child('phone').set(phone)
-
   }
-
   render() {
     const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
     return (

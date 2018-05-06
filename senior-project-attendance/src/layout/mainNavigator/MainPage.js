@@ -5,12 +5,7 @@ import DrawerHeader from './Drawer/DrawerHeader';
 import { Icon, Container, Header, Content, Left } from 'native-base'; 
 import firebase from '../../config/firebase'
 
-import AppVarible from '../../Model/AppVarible'
-
 export default class MainPage extends React.Component {
-  constructor(props) {
-    super(props)
-  }
   static navigationOptions = ({ navigation }) => ({
     title: 'หน้าหลัก',
     //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
@@ -32,8 +27,9 @@ export default class MainPage extends React.Component {
   })
   */
 
-  render() {
-    const { navigate } = this.props.navigation;
+  render() { 
+    console.log('main page',this.props.screenProps)
+    const { openDrawer } = this.props.navigation
     const { deviceSize:{deviceHeight, deviceWidth}, photoUrl, name } = this.props.screenProps
     if (deviceHeight < deviceWidth) {
       var profile_height = 7 / 20 * deviceHeight
@@ -44,7 +40,7 @@ export default class MainPage extends React.Component {
     }
     return (
       <View style={styles.container}>
-        <DrawerHeader drawerNavigate={navigate} deviceHeight={deviceHeight} />
+        <DrawerHeader openDrawer={openDrawer} deviceHeight={deviceHeight} />
         <View style={styles.page}>
 
           <View style={[styles.top, { width: deviceWidth, }]} >

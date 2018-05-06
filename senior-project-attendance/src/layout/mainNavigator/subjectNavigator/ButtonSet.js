@@ -1,53 +1,70 @@
 import React, { Component } from 'react';
 
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { DrawerNavigator, NavigationActions } from 'react-navigation';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class ButtonSet extends React.Component {
   render() {
-    const { text } = this.props
+    const { deviceSize: { deviceHeight, deviceWidth }, text } = this.props
     return (
-          <View style={styles.container} >
-            <Text style={{
-              fontSize: 1 / 20 * deviceHeight
-            }} >
-              {text}
-            </Text>
-            <TouchableOpacity onPress={() => { }} style={[styles.summitButton, {
-              height: 1 / 20 * deviceHeight,
-              width: 1 / 3 * deviceWidth,
-              right: 1 / 20 * deviceWidth,
-              bottom: 1.5 / 20 * deviceHeight,
-              borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-            }]} >
-              <Text style={[styles.summitButtonText, {
-                fontSize: 1 / 30 * deviceHeight
-              }]} >
-                เลือกเวลาเรียน
+      <View style={[styles.container, {
+        width: 0.75 * deviceWidth
+      }]} >
+        <View style={{
+          height: 1 / 15 * deviceHeight,
+          // right: 1 / 20 * deviceWidth,
+          // bottom: 1.5 / 20 * deviceHeight
+        }} >
+          <Text style={{
+            fontSize: 1 / 30 * deviceHeight
+          }} >
+            {text + ' : '}
+          </Text>
+        </View >
+        <TouchableOpacity onPress={() => { }} style={[styles.button, {
+          height: 1 / 15 * deviceHeight,
+          width: 0.5 * deviceWidth,
+          // right: 1 / 20 * deviceWidth,
+          // bottom: 1.5 / 20 * deviceHeight,
+          borderRadius: 1 / 3 * 1 / 15 * deviceHeight
+        }]} >
+          <Image
+            source={require('../../../pics/temp6.png')}
+            style={{
+              left: 1 / 15 * 0.3 * deviceHeight,
+              height: 1 / 15 * 0.8 * deviceHeight,
+              width: 1 / 15 * 0.8 * deviceHeight,
+              marginVertical: 1 / 15 * 0.1 * deviceHeight
+            }} />
+          <Text style={[styles.buttonText, {
+            flex: 1, justifyContent: 'center',
+            fontSize: 1 / 30 * deviceHeight
+          }]} >
+            เลือกเวลา
                 </Text>
-            </TouchableOpacity>
-          </View >
+        </TouchableOpacity>
+      </View >
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
   },
   button: {
-    justifyContent: 'center',
+    flexDirection: 'row',
+    // justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0070C0'
+    // backgroundColor: '#0070C0' #EDEDED
+    backgroundColor: '#EDEDED'
   },
   buttonText: {
     //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
-    color: '#FFFFFF',
+    // color: '#FFFFFF', 
   },
   icon: {
     width: 24,

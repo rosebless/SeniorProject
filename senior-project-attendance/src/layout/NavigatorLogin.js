@@ -1,14 +1,11 @@
 import React from 'react';
-import { StackNavigator } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation';
 
-import LoginPage from './Login';
-import RegisterPage from './Register';
-import NavigatorMain from './mainNavigator/NavigatorMain';
+import Login from './Login';
+import Register from './Register';
+import NMain from './mainNavigator/NavigatorMain';
 
 export default class NavigatorLogin extends React.Component {
-    constructor(props) {
-        super(props)
-    }
     render() {
         const { deviceSize } = this.props
         return (
@@ -17,10 +14,10 @@ export default class NavigatorLogin extends React.Component {
     }
 }
 
-const SNLogin = StackNavigator({
-    Login: { screen: LoginPage },
-    Register: { screen: RegisterPage },
-    NM: { screen: NavigatorMain }
+const SNLogin = createStackNavigator({
+    Login,
+    Register,
+    NMain
 }, {
         headerMode: 'none',
         headerVisible: false,

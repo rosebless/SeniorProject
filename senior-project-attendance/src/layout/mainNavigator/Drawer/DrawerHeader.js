@@ -3,7 +3,7 @@ import {
     Text, View, Image, TouchableHighlight, TouchableOpacity, Alert
 } from 'react-native';
 import { } from 'react-navigation'
-import AppVarible from '../../../Model/AppVarible';
+// import AppVarible from '../../../Model/AppVarible';
 
 export default class DrawerHeader extends Component {
     render() {
@@ -39,7 +39,7 @@ export default class DrawerHeader extends Component {
         //     mainNavigate = AppVarible.appVarible.navigationSaved.main.navigate
         // }
 
-        const { deviceHeight, drawerNavigate } = this.props
+        const { deviceHeight, openDrawer } = this.props
 
         return (<View style={{
             height: 1 / 10 * deviceHeight,
@@ -52,7 +52,7 @@ export default class DrawerHeader extends Component {
                 onPress={() => {
                     // @FIX step 4
                     // call fnNavigate function
-                    drawerNavigate('DrawerOpen')       //fnNavigate('DrawerOpen');
+                    openDrawer()   //fnNavigate('DrawerOpen');
                     // navigate('DrawerOpen');
                     // alert(5555);
                     // alert(JSON.stringify(this.props.navigation))

@@ -1,44 +1,55 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button, Image, TouchableOpacity } from 'react-native';
-import { StackNavigator } from 'react-navigation' 
-import Dashboard_SelectionPage from './Dashboard_Selection'
-import DashboardPage from './Dashboard'
+import { createStackNavigator } from 'react-navigation'
+import Dashboard_Selection from './Dashboard_Selection'
+import Dashboard from './Dashboard'
+
+const SNDashboard = createStackNavigator({
+  Dashboard_Selection,
+  Dashboard
+}, {
+    headerMode: 'none',
+    headerVisible: false,
+    navigationOptions: {
+      gesturesEnabled: false
+    }
+  });
 
 export default class NavigatorDashboard extends React.Component {
-    static navigationOptions = ({ navigation }) => ({
-        title: 'สรุป' ,
-        drawerIcon: ({ tintColor }) => (
-          <Image
+
+  static router = SNDashboard.router
+
+  static navigationOptions = ({ navigation }) => ({
+    title: 'สรุป',
+    drawerIcon: ({ tintColor }) => (
+      <Image
         source={require('../../../pics/temp5.png')}
-        style={styles.icon} 
+        style={styles.icon}
       />
-        ),
-        
-      })
-    
+    ),
+  })
+
   render() {
-    const { deviceSize, professorID } = this.props.screenProps 
-    const drawerNavigate = this.props.navigation.navigate
+    const { deviceSize, professorKey } = this.props.screenProps
+    const { openDrawer } = this.props.navigation
+    const { ...params } = this.props.navigation.state.params
+    console.log('NavigatorDashboard this.props', this.props)
+    console.log('this.props.navigation.state.params', this.props.navigation.state.paramsrams)
     // @FIX step 1
     // add screenProps
     // alert('test ->', JSON.stringify(this.props))
     return (
-      <SNDashboard /*screenProps={{ rootNavigation: this.props.navigation }}*/ screenProps={{ deviceSize, professorID, drawerNavigate }} />
+      <SNDashboard navigation={this.props.navigation} /*screenProps={{ rootNavigation: this.props.navigation }}*/
+        screenProps={{ deviceSize, professorKey, openDrawer, ...params }} />
     );
   }
 }
 
-const SNDashboard = StackNavigator({
-    Dashboard_Selection: { screen: Dashboard_SelectionPage } ,
-    Dashboard: { screen: DashboardPage } 
-},{
-    headerMode: 'none', 
-    headerVisible: false   
-});
+
 
 const styles = StyleSheet.create({
-    icon: {
-      width: 24,
-      height: 24,
-    },
-  }); 
+  icon: {
+    width: 24,
+    height: 24,
+  },
+}); 

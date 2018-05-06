@@ -7,7 +7,7 @@ import { Icon, Button, Container, Header, Content, Left } from 'native-base';
 import AppVarible from '../../Model/AppVarible'
 import firebase from '../../config/firebase'
 
-export default class ScanningPage extends React.Component {
+export default class selection extends React.Component {
   /*
 static navigationOptions = ({ navigation }) => ({ 
   title: 'เช็คชื่อ',
@@ -26,18 +26,23 @@ static navigationOptions = ({ navigation }) => ({
     super(props)
     this.state = {
       subjects: []
-    }
+    } 
   }
 
   componentWillMount = () => {
-    this.getUserSubjectsFormFirebase()
+    // firebase.database().goOffline()
+  this.getUserSubjectsFormFirebase()
+  }      
+
+  componentWillUnmount = () => {
+    // firebase.database(false)
+    // firebase.database().ref('/Professor').child(professorKey).child('subjects').off()
   }
 
-
-  getUserSubjectsFormFirebase = () => {
-    const { professorID } = this.props.screenProps
-    console.log(professorID)
-    firebase.database().ref('/User').child(professorID).child('subjects').on('value', snapshot => {
+  getUserSubjectsFormFirebase = () => { 
+    const { professorKey } = this.props
+    console.log(professorKey)
+    firebase.database().ref('/Professor').child(professorKey).child('subjects').once('value', snapshot => {
       // console.log(snapshot.val())
       // resolve(snapshot.val()); 
       const objSubject = snapshot.val()
@@ -46,30 +51,31 @@ static navigationOptions = ({ navigation }) => ({
         let photoUrl
         switch (index % 4) {
           case 1:
-          photoUrl = require('../../pics/temp1.png')
+            photoUrl = require('../../pics/temp1.png')
             break
           case 2:
-          photoUrl = require('../../pics/temp2.png')
+            photoUrl = require('../../pics/temp2.png')
             break
           case 3:
-          photoUrl = require('../../pics/temp3.png')
+            photoUrl = require('../../pics/temp3.png')
             break
           case 4:
-          photoUrl = require('../../pics/temp4.png')
+            photoUrl = require('../../pics/temp4.png')
             break
         }
         // console.log(ImageProduct)
         return key.split('-')[3]
           ? {
             id: key,
-            subjectCode: key.split('-')[2],
-            subjectName: objSubject[key].name,
+            code: key.split('-')[2],
+            name: objSubject[key].name,
             section: key.split('-')[3],
-            photoUrl          }
+            photoUrl
+          }
           : {
             id: key,
-            subjectCode: key.split('-')[2],
-            subjectName: objSubject[key].name,
+            code: key.split('-')[2],
+            name: objSubject[key].name,
             photoUrl
           }
       }
@@ -99,19 +105,20 @@ static navigationOptions = ({ navigation }) => ({
     return Object.keys(objSubject).filter(subject => subject.substr(0, 6) == currentTerm)
   }
 
-  render() {
+  render() { 
+    console.log('selection',this.props)
     const {
       deviceSize: { deviceHeight, deviceWidth },
       professorID,
-      drawerNavigate,
+      openDrawer,
       namePage,
       customNavigate,
       screenNavigate,
-    } = this.props.screenProps;
+    } = this.props;
     const { subjects } = this.state
     return (
       <View style={styles.container}>
-        <DrawerHeader drawerNavigate={drawerNavigate} deviceHeight={deviceHeight} />
+        <DrawerHeader openDrawer={openDrawer} deviceHeight={deviceHeight} />
         <View style={styles.top}>
           <Image source={require('../../pics/logo.png')} style={{ position: 'absolute', width: 320 / 367 * 3 / 20 * deviceHeight, height: 3 / 20 * deviceHeight, left: 0.05 * deviceWidth }} />
           <Text style={{ fontSize: 1.5 / 40 * deviceHeight }} > {namePage} </Text>
@@ -120,14 +127,15 @@ static navigationOptions = ({ navigation }) => ({
           <FlatList
             style={{ width: 0.9 * deviceWidth }}
             data={subjects}
-            renderItem={({ item }) => (
+            renderItem={ ({item:subject}) => (
 
               <View style={{
                 margin: 1 / 10 * 0.1 * deviceHeight,
               }}>
+              {/* {console.log('inloop',subject)} */}
                 <TouchableOpacity
                   onPress={() => {
-                    customNavigate(screenNavigate, { subjects, focus: item })
+                    customNavigate(screenNavigate, { focus: subject })
                   }} >
                   <View style={{
                     flex: 1,
@@ -140,7 +148,7 @@ static navigationOptions = ({ navigation }) => ({
 
                   }}>
                     <Image
-                      source={item.photoUrl}
+                      source={subject.photoUrl}
                       style={{
                         width: 1 / 10 * 0.8 * deviceHeight, height: 1 / 10 * 0.8 * deviceHeight, margin: 1 / 10 * 0.1 * deviceHeight
                       }} />
@@ -155,20 +163,20 @@ static navigationOptions = ({ navigation }) => ({
                       <Text style={[styles.itemName, {
                         fontSize: 1 / 10 * 1 / 6 * deviceHeight
                       }]}>
-                        {item.subjectCode}
+                        {subject.code}
                       </Text>
                       <Text style={[styles.itemDetail, {
                         fontSize: 1 / 10 * 1 / 6 * deviceHeight
                       }]}>
-                        {item.subjectName}
+                        {subject.name}
                       </Text>
                       { // condition && expression => if(conditon) expression it is short if without else 
-                        item.section
+                        subject.section
                         && (
                           <Text style={[styles.itemCode, {
                             fontSize: 1 / 10 * 1 / 6 * deviceHeight
                           }]}>
-                            ( Sec {item.section} )
+                            ( Sec {subject.section} )
                              </Text>
                         )
                       }
@@ -178,7 +186,7 @@ static navigationOptions = ({ navigation }) => ({
               </View>
 
             )}
-            keyExtractor={item => item.id}
+            keyExtractor={subject => subject.id}
           //numColumns={numColumns} 
           />
         </View>
