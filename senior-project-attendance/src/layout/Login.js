@@ -56,7 +56,7 @@ export default class Login extends React.Component {
   }
   render() {
     const { navigate } = this.props.navigation;
-    const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
+    const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize 
     return (
       <View style={styles.container}>
         <View style={[styles.logo, {

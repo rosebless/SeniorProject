@@ -220,21 +220,26 @@ export default class Scanner extends React.Component {
       lastScannedCode: null,
       students: [],
       studentsInClass: [],
+      studentsOld: [],
+      timeIn: '',
+      timeLate: '',
+      timeOut: '',
+      session: '',
+      date: '',
+      classKey: '',
       statusIcon: require('../../../pics/temp5.png'),
       statusColor: 'white',
       statusOutput: 'eiei',
       offsetY: new Animated.Value(0)
     }
-    this.getStudentFormFirebase()
   }
   static navigationOptions = ({ navigation }) => ({
     header: false,
   });
 
   componentWillMount = () => {
-    
+    this.getStudentFormFirebase()
   }
-
 
   componentDidMount() {
     this._requestCameraPermission();
@@ -251,36 +256,81 @@ export default class Scanner extends React.Component {
     if (result.data !== this.state.lastScannedCode) {
       LayoutAnimation.spring();
       this.setState({ lastScannedCode: result.data });
-      this.attendance(result.data)
+      this.attendance(result.data, this.checkSuccess, this.checkWarning, this.checkFail, this.finishingOutput)
     };
   }
 
-  attendance = (student) => {
+  getStudentFormFirebase = () => {
+    const { focus: { id } } = this.props.navigation.state.params
+    firebase.database().ref('/Subject').child(id).once('value', snapshot => {
+      // console.log(snapshot.val()) 
+      const objSubject = snapshot.val()
+      const studentsInClass = Object.keys(objSubject.students)
+      // console.log(studentsInClass)
+      this.setState({ studentsInClass })
+      this.getTimeForAttendance(objSubject.attendance, objSubject.timeIn, objSubject.timeLate, objSubject.timeOut)
+    })
+  }
+
+  getTimeForAttendance = (attendance = [], timeIn = '', timeLate = '', timeOut = '') => {
+    const option = { year: 'numeric', month: 'numeric', day: 'numeric' } // day/month/year 
+    const today = (new Date().toLocaleDateString('th-TH', option)).split('/').reverse().join('-')
+    console.log('today', today)
+    const hourCheck = timeIn.split(':')
+    const session
+      = hourCheck < 6 ? 'midnight'
+        : hourCheck < 13 ? 'morning'
+          : hourCheck < 17 ? 'afternoon'
+            : hourCheck < 21 ? 'evening'
+              : 'night'
+    const classKey = Object.keys(attendance).find(key => attendance[key].date == today && attendance[key].session == session)
+    classKey
+      ? this.setState({ classKey, studentsOld: Object.keys(attendance[classKey].students) })
+      : this.setState({ classKey: ['week', Object.keys(attendance).length + 1].join('-'), date: today, session })
+    this.setState({ timeIn, timeLate, timeOut })
+  }
+
+  attendance = (student, checkSuccess, checkWarning, checkFail, finishingOutput) => {
     console.log(this.isInClass(student))
     if (this.isInClass(student) && !this.isDuplicate(student)) { //ตรวจสอบรายชื่อ  
       // console.log('true')
-      this.updateStudens(student)
-      this.setState({
-        // statusIcon: require('../../../pics/temp5.png'), 
-        statusColor: '#3eee26',
-        statusOutput: 'สำเร็จ'
-        //studentsText
-      })
-    } else if (this.isDuplicate(student)) {
-      this.setState({
-        // statusIcon: require('../../../pics/temp4.png'), 
-        statusColor: '#ffc000',
-        statusOutput: 'ข้อมูลซ้ำ'
-      })
-    } else {
+      this.updateStudens(student, checkSuccess, checkWarning, checkFail)
+    } else if (this.isDuplicate(student)) { // เคยเช็คไปแล้ว 
+      checkWarning('ข้อมูลซ้ำ')
+    } else { // ไม่มีอยู่ในรายชื่อ
       // console.log('false')
-      this.setState({
-        // statusIcon: require('../../../pics/temp4.png'),
-        statusColor: '#ff0000',
-        statusOutput: 'ไม่สำเร็จ'
-      })
+      checkFail('ไม่สำเร็จ')
     }
     // Animation output 
+    finishingOutput()
+  }
+
+  checkSuccess = (text) => {
+    this.setState({
+      // statusIcon: require('../../../pics/temp5.png'), 
+      statusColor: '#3eee26',
+      statusOutput: text
+      //studentsText
+    })
+  }
+
+  checkWarning = (text) => {
+    this.setState({
+      // statusIcon: require('../../../pics/temp4.png'), 
+      statusColor: '#ffc000',
+      statusOutput: text
+    })
+  }
+
+  checkFail = (text) => {
+    this.setState({
+      // statusIcon: require('../../../pics/temp4.png'),
+      statusColor: '#ff0000',
+      statusOutput: text
+    })
+  }
+
+  finishingOutput = () => {
     const { deviceHeight } = this.props.screenProps.deviceSize
     Animated.sequence([
       Animated.timing(this.state.offsetY, {
@@ -295,10 +345,39 @@ export default class Scanner extends React.Component {
     ]).start();
   }
 
-  updateStudens = (student) => {
-    let students = this.state.students
-    students.push(student)
-    this.setState({ students })
+  updateStudens = (student, checkSuccess, checkWarning, checkFail) => {
+    const { timeIn, timeLate, timeOut } = this.state
+    const date = new Date()
+    const [hour, minute, second] = [date.getHours().toLocaleString('th-TH'), date.getMinutes().toLocaleString('th-TH'), date.getSeconds().toLocaleString('th-TH')]
+    console.log('test', minute, hour)
+    const [hourIn, minuteIn] = parseInt(timeIn.split(':')[1]) - 30 < 0
+      ? [parseInt(timeIn.split(':')[0]) - 1, parseInt(timeIn.split(':')[1]) + 30]
+      : [parseInt(timeIn.split(':')[0]), parseInt(timeIn.split(':')[1]) - 30]
+    const hourLate = parseInt(timeLate.split(':')[0])
+    const minuteLate = parseInt(timeLate.split(':')[1])
+    const [hourOut, minuteOut] = parseInt(timeOut.split(':')[1]) + 30 > 60
+      ? [parseInt(timeOut.split(':')[0]) + 1, parseInt(timeOut.split(':')[1]) - 30]
+      : [parseInt(timeOut.split(':')[0]), parseInt(timeOut.split(':')[1]) + 30]
+    if (hour < hourIn || hour > hourOut || (hour == hourIn && minute < minuteIn) || (hour == hourOut && minute > minuteOut)) {
+      checkFail('เวลาไม่ถูกต้อง')
+    } else {
+      const [status, output, textOutput]
+        = hour < hourLate || (hour == hourLate && minute < minuteLate)
+          ? ['atten', checkSuccess, 'สำเร็จ']
+          : hour < hourOut || (hour == hourOut && minute < minuteOut)
+            ? ['late', checkWarning, 'มาสาย']
+            : ['absert', checkFail, 'ขาดเรียน']
+      output(textOutput)
+      const { students } = this.state
+      students[student] = {
+        status,
+        time: [hour, minute, second].join(':'),
+        timeIn,
+        timeLate,
+        timeOut
+      }
+      this.setState({ students })
+    }
   }
 
   isInClass = (student) => {
@@ -308,27 +387,15 @@ export default class Scanner extends React.Component {
     })
   }
 
-  isDuplicate = (student) => {
-    const { students } = this.state
-    return students.some(studentChecked => {
-      return student === studentChecked
-    })
-  }
-
-  getStudentFormFirebase = () => {
-    const { focus: { id } } = this.props.navigation.state.params
-    firebase.database().ref('/Subject').child(id).child('students').once('value', snapshot => {
-      // console.log(snapshot.val())
-      const studentsInClass = Object.keys(snapshot.val())
-      // console.log(studentsInClass)
-      this.setState({ studentsInClass })
-    })
-  }
+  isDuplicate = (student) => (
+    Object.keys(this.state.students).some(studentChecking => student === studentChecking)
+    || this.state.studentsOld.some(studentChecking => student === studentChecking)
+  )
 
   manualButton = () => {
-    const {  navigate, state: { params: { focus } } } = this.props.navigation
+    const { navigate, state: { params: { focus } } } = this.props.navigation
     navigate('ManualAttendance',
-      {  focus, isInClass: this.isInClass, isDuplicate: this.isDuplicate, updateStudens: this.updateStudens })
+      { focus, attendance: this.attendance })
   }
 
   summitButton = () => {
@@ -337,32 +404,41 @@ export default class Scanner extends React.Component {
     //     result = result + this.state.students[i] + '\n'
     //   } else {
     //     result = result + this.state.students[i] 
-    //   }
+    //   } 
     // }
     let result = ''
     const { students } = this.state
-    students.forEach(s => {
+    Object.keys(students).forEach(s => {
       result = result + s + '\n'
     });
     const date = this.getDay()
-    const title = `วันที่ ${date} จำนวนนักศึกษาที่เรียน ${students.length} คน`
-    result = result.substring(0, result.length - 1) 
+    const title = `วันที่ ${date} จำนวนนักศึกษาที่เรียน ${Object.keys(students).length} คน`
+    result = result.substring(0, result.length - 1)
     const { screenProps: { deviceSize }, navigation: { navigate, state: { params: { focus } } } } = this.props
-    console.log('Scanner focus',focus)
+    console.log('Scanner focus', focus)
     Alert.alert(
       title,
       result,
       [
-        { text: 'ใช่', onPress: () => { navigate('ByPassToDashboard',{focus}) } },
+        { text: 'ใช่', onPress: () => { this.upload(); navigate('ByPassToDashboard', { focus }) } },
         { text: 'ไม่ใช่', onPress: () => { } },
       ],
       { cancellable: false }
     )
-
   };
 
+  upload = () => {
+    const { focus: { id } } = this.props.navigation.state.params
+    const { classKey, students, session, date } = this.state
+    firebase.database().ref('/Subject').child(id).child('attendance').child(classKey).set({
+      students,
+      session,
+      date,
+    })
+  }
+
   getDay = () => {
-    var options = { year: '2-digit', month: 'short', day: 'numeric' } // year: 'long'
+    var options = { year: '2-digit', month: 'short', day: 'numeric' } // year: 'numeric'
     return new Date().toLocaleDateString('th-TH', options)
   }
 
@@ -475,7 +551,7 @@ export default class Scanner extends React.Component {
                 <Text style={[styles.countStudentsText, {
                   fontSize: 1 / 30 * deviceHeight
                 }]} >
-                  จำนวน {students.length} คน
+                  จำนวน {Object.keys(students).length} คน
                 </Text>
               </View>
 

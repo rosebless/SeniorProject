@@ -4,10 +4,12 @@ import { createStackNavigator } from 'react-navigation';
 import NavigatorMain from '../NavigatorMain';
 import SubjectManage_Selection from './SubjectManage_Selection';
 import Manager from './Manager'
+import TimePicker from './TimePicker'
 
 const SNSubject = createStackNavigator({
   SubjectManage_Selection,
-  Manager
+  Manager,
+  TimePicker
 }, {
     headerMode: 'none',
     headerVisible: false,

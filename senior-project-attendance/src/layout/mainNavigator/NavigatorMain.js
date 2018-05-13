@@ -23,7 +23,7 @@ const DNMainPage = createDrawerNavigator({
 }, {
     initialRouteName: 'Main',
     drawerWidth,
-    contentComponent: props => <CustomDrawer {...props} drawerWidth={drawerWidth} />,
+    contentComponent: props => <CustomDrawer drawerProps={props} drawerWidth={drawerWidth} />,
     // drawerOpenRoute: 'DrawerOpen',
     // drawerCloseRoute: 'DrawerClose',
     // drawerToggleRoute: 'DrawerToggle',
@@ -43,12 +43,12 @@ export default class NavigatorMain extends React.Component {
     }
   }
   static router = DNMainPage.router
-  setNameInScreenProps = (name) => this.setState({ name }) 
+  setNameInScreenProps = (name) => this.setState({ name })
   render() {
     const { screenProps: { deviceSize }, navigation: { state: { params: { photoUrl, professorKey } } } } = this.props // params = name, photoUrl, professorKey
     // const { ...params } = this.props.navigation.state.params // professorID, photoUrl, name, phone 
-    const { name } = this.state 
-    console.log('this.props.navigation',this.props.navigation)
+    const { name } = this.state
+    console.log('this.props.navigation', this.props.navigation)
     return (
       <DNMainPage navigation={this.props.navigation}
         screenProps={{ deviceSize, name, photoUrl, professorKey, setNameInScreenProps: this.setNameInScreenProps }}

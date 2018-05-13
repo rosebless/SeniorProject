@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class ButtonSet extends React.Component {
   render() {
-    const { deviceSize: { deviceHeight, deviceWidth }, text } = this.props
+    const { deviceSize: { deviceHeight, deviceWidth }, text, navigate, updateTimeOnFirebase } = this.props
     return (
       <View style={[styles.container, {
         width: 0.75 * deviceWidth
@@ -20,7 +20,7 @@ export default class ButtonSet extends React.Component {
             {text + ' : '}
           </Text>
         </View >
-        <TouchableOpacity onPress={() => { }} style={[styles.button, {
+        <TouchableOpacity onPress={() => { navigate('TimePicker', { timeText: text, updateTimeOnFirebase }) }} style={[styles.button, {
           height: 1 / 15 * deviceHeight,
           width: 0.5 * deviceWidth,
           // right: 1 / 20 * deviceWidth,

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, Image, TouchableOpacity } from 'react-native';
-import { DrawerNavigator, NavigationActions } from 'react-navigation'; 
+import { DrawerNavigator, NavigationActions } from 'react-navigation';
 //port { Icon } from 'native-base'
-import { Icon, Button, Container, Header, Content, Left } from 'native-base'; 
+import { Icon, Button, Container, Header, Content, Left } from 'native-base';
 import Keyboard from 'react-native-keyboard';
 
 export default class ManualAttendance extends React.Component {
@@ -11,7 +11,7 @@ export default class ManualAttendance extends React.Component {
         student: '000000',
         textOutput: 'รอกรอกรหัสนักศึกษา',
         textOutputColor: 'black'
-    } 
+    }
 
     // componentDidMount() {
     //     model.onChange((model) => {
@@ -31,23 +31,28 @@ export default class ManualAttendance extends React.Component {
     //     model.addKey(key);
     // }
 
-    manualAttendance = () => {
-        const { isInClass, isDuplicate, updateStudens } = this.props.navigation.state.params
-        const { student } = this.state
-        let textOutput = 'รอกรอกรหัสนักศึกษา'
-        let textOutputColor = 'black'
-        if (isInClass(student) && !isDuplicate(student)) {
-            updateStudens(student)
-            textOutput = 'สำเร็จ'
-            textOutputColor = '#3eee26'
-        } else if (isDuplicate(student)) {
-            textOutput = 'รหัสนักศึกษาซ้ำ'
-            textOutputColor = '#ffc000'
-        } else {
-            textOutput = 'ไม่สำเร็จ'
-            textOutputColor = '#ff0000'
-        }
-        this.setState({ textOutput, textOutputColor })
+    checkSuccess = (text) => {
+        this.setState({
+            textOutput: text,
+            textOutputColor: '#3eee26'
+        })
+    }
+
+    checkWarning = (text) => {
+        this.setState({
+            textOutput: text,
+            textOutputColor: '#ffc000'
+        })
+    }
+
+    checkFail = (text) => {
+        this.setState({
+            textOutput: text,
+            textOutputColor: '#ff0000'
+        })
+    }
+
+    finishingOutput = () => {
         setTimeout(() => {
             this.setState({
                 textOutput: 'รอกรอกรหัสนักศึกษา',
@@ -57,9 +62,9 @@ export default class ManualAttendance extends React.Component {
     }
 
     render() {
-        const { focus } = this.props.navigation.state.params 
+        const { focus, attendance } = this.props.navigation.state.params
         const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
-        const { textOutput, textOutputColor } = this.state
+        const { student, textOutput, textOutputColor } = this.state
         return (
             <View style={styles.container}>
                 <View style={{ flex: 1 }} />
@@ -148,7 +153,7 @@ export default class ManualAttendance extends React.Component {
                 </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => { this.manualAttendance() }} style={[styles.botButton, {
+                <TouchableOpacity onPress={() => { attendance(student, this.checkSuccess, this.checkWarning, this.checkFail, this.finishingOutput) }} style={[styles.botButton, {
                     height: 1 / 10 * deviceHeight,
                     width: 4 / 10 * deviceWidth,
                     right: 2 / 10 / 3 * deviceWidth,
@@ -161,14 +166,14 @@ export default class ManualAttendance extends React.Component {
                         ยืนยัน
                 </Text>
                 </TouchableOpacity>
-                
+
                 {/* <Keyboard
                     keyboardType="decimal-pad"
                     // onClear={this._handleClear.bind(this)}
                     // onDelete={this._handleDelete.bind(this)}
                     // onKeyPress={this._handleKeyPress.bind(this)}
                 /> */}
-                
+
             </View>
         );
     }

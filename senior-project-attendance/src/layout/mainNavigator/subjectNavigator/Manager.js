@@ -52,6 +52,10 @@ export default class Manager extends React.Component {
       firebase.database().ref('/Subject').child(id).child('professors').set(professorUpdate)
     })
   }
+  updateTimeOnFirebase = (timeType, timeSet) => { // timeType = 'timeIn', 'timeLate', 'timeOut'
+    const { id } = this.props.navigation.state.params.focus
+    firebase.database().ref('/Subject').child(id).child(timeType).set(timeSet)
+  }
   render() {
     const { focus } = this.props.navigation.state.params
     const { deviceSize, deviceSize: { deviceHeight, deviceWidth }, professorID, openDrawer } = this.props.screenProps
@@ -109,9 +113,9 @@ export default class Manager extends React.Component {
           />
         </View>
         <View style={styles.bot} >
-          <ButtonSet deviceSize={deviceSize} text={'เข้าเรียน'} />
-          <ButtonSet deviceSize={deviceSize} text={'เข้าสาย'} />
-          <ButtonSet deviceSize={deviceSize} text={'ขาดเรียน'} />
+          <ButtonSet deviceSize={deviceSize} text={'เข้าเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeIn', timeSet)} />
+          <ButtonSet deviceSize={deviceSize} text={'เข้าสาย'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeLate', timeSet)} />
+          <ButtonSet deviceSize={deviceSize} text={'ขาดเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeOut', timeSet)} />
         </View>
       </View>
 

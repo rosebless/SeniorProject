@@ -14,8 +14,8 @@ static navigationOptions = ({ navigation }) => ({
   //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
   //drawerLabel: 'Notification',
   
-  drawerIcon: ({ tintColor }) => (
-    <Image
+  drawerIcon: ({ tintColor }) => ( 
+    <Image 
       source={require('../../pics/temp4.png')}
       style={styles.icon}
     />

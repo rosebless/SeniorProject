@@ -25,8 +25,9 @@ export default class CustomDrawer extends React.Component {
 
   render() {
     // console.log('customDrawer', this.props)
-    // const { drawerProps, drawerWidth } = this.props.screenProps
-    const { drawerWidth, screenProps: { deviceSize: { deviceHeight, deviceWidth }, name, photoUrl }, ...props } = this.props
+    // const { drawerProps, drawerWidth } = this.props.screenProps 
+    console.log(this.props.drawerProps)
+    const { drawerWidth, screenProps: { deviceSize: { deviceHeight, deviceWidth }, name, photoUrl } } = this.props.drawerProps
     if (deviceHeight < deviceWidth) {
       var profile_height = 3 / 20 * deviceHeight
       var profile_width = 3 / 20 * deviceHeight
@@ -74,7 +75,7 @@ export default class CustomDrawer extends React.Component {
             width: drawerWidth
           }]}
         >
-          <DrawerItems {...props} />
+          <DrawerItems {...this.props.drawerProps} />
         </ScrollView>
         <View style={[styles.bottomFixed, {
           height: 3 / 20 * deviceHeight,

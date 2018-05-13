@@ -1,6 +1,7 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
-import NavigatorLogin from './src/layout/NavigatorLogin';
+import { View, Dimensions } from 'react-native';
+import NavigatorLogin from './src/layout/NavigatorLogin'; 
+import TimePicker from './src/layout/mainNavigator/subjectNavigator/TimePicker'
 
 export default class App extends React.Component {
   state = {
@@ -12,6 +13,9 @@ export default class App extends React.Component {
   render() {
     return (
       <NavigatorLogin deviceSize={this.state.deviceSize} />
+      // <View>
+      // <TimePicker deviceSize={this.state.deviceSize} /> 
+      // </View>
     );
   }
 }
