@@ -167,7 +167,7 @@ export default class Import extends React.Component {
                 book_append_sheet(workBook, workSheet, sheetName)
                 console.log(workBook)
             })
-            XLSX.writeFile(workBook, 'test.xlsx', { type: 'binary', cellStyles: true })
+            XLSX.writeFile(workBook, 'Attendance.xls', { type: 'binary', cellStyles: true })
             const filesC = files.map(file => ({ ...file, checked: false }))
             this.setState({ files: filesC })
         })
