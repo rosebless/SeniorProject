@@ -17,7 +17,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 export default class PopUpConfirm extends React.Component {
 
     handleOpen = () => {
-        this.props.handleOpen()       
+        this.props.handleOpen()
     };
 
     handleClose = () => {
@@ -28,9 +28,9 @@ export default class PopUpConfirm extends React.Component {
         const { transaction, onClickConfirm } = this.props
         console.log('pop up del')
         const buttonDisabled = transaction === 'pending'
-        const [textStart, textPending, textFinish] = this.props.mode === 'import'
-            ? ['คุณต้องการเพิ่มราวิชา หรือไม่', 'กำลังลังเพิ่มราวิชา...', 'การเพิ่มราวิชา สำเร็จ']
-            : ['คุณต้องการนำข้อมูลออก หรือไม่', 'กำลังลังนำข้อมูลออก...', 'การนำข้อมูลออก สำเร็จ']
+        const [textStart, textPending, textFinish, textError] = this.props.mode === 'import'
+            ? ['คุณต้องการเพิ่มราวิชา หรือไม่', 'กำลังลังเพิ่มราวิชา...', 'การเพิ่มราวิชา สำเร็จ', 'เกิดข้อผิดพลาด : ไฟล์ไม่สมบูรณ์']
+            : ['คุณต้องการนำข้อมูลออก หรือไม่', 'กำลังลังนำข้อมูลออก...', 'การนำข้อมูลออก สำเร็จ', '']
         return (
             <div>
                 {/* <svg viewBox="0 0 24 24" style={{ height: 50, width: 50 }} onClick={this.handleOpen} >
@@ -52,7 +52,9 @@ export default class PopUpConfirm extends React.Component {
                                         ? textStart
                                         : transaction === 'pending'
                                             ? textPending
-                                            : textFinish
+                                            : this.props.validation
+                                                ? textFinish
+                                                : textError
                                 }
                             </p>
                         </div>

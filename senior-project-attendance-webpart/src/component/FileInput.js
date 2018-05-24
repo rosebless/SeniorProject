@@ -84,7 +84,8 @@ class Files extends React.Component {
 
       // Add by SW 
       file.addedTime = this.getTime()
-      file.countSame = 0 
+      file.countSame = 0  
+      file.validation = true
 
       // Add preview, either image or file extension
       if (file.type && this.mimeTypeLeft(file.type) === 'image') {

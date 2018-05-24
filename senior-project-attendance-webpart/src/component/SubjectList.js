@@ -47,7 +47,7 @@ export default class SubjectList extends React.Component {
                     files.map((file, index) => {
                         const subject = mode == 'import' ? this.formatFileToSubject(file) : this.formatForEx(file)
                         console.log('file.id', file.id)
-                        return (<SubjectItem mode={mode} subject={subject} key={file.id}
+                        return (<SubjectItem mode={mode} subject={subject} key={file.id} validation={file.validation}
                             cancelSelection={cancelSelection}
                             onChecked={() => onChecked(index)}
                         />)

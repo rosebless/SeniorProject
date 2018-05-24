@@ -466,7 +466,8 @@ export default class Import extends React.Component {
         files: [],
         subjects: {},
         openDialog: false,
-        transaction: 'wait confirm'
+        transaction: 'wait confirm',
+        validation: true
     }
 
     handleOpen = () => {
@@ -477,7 +478,7 @@ export default class Import extends React.Component {
     };
 
     handleClose = () => {
-        this.setState({ openDialog: false });
+        this.setState({ validation: true, openDialog: false });
     };
 
     onClickConfirm = () => {
@@ -581,7 +582,7 @@ export default class Import extends React.Component {
         const { files } = this.state
         var subjects = {}
         var xxx = {};
-        files.forEach(async (file) => {
+        files.forEach(async (file, index) => {
             // const id = file.name.split(' ')
             const reader = new FileReader();
             reader.onload = async (e) => {
@@ -591,11 +592,13 @@ export default class Import extends React.Component {
                 console.log(workbook.Sheets[workbook.SheetNames[0]])
                 const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 'A' });
                 console.log(data)
-                const [id, subject] = await this.getDataForFirebase(data)
+                const [id, subject, validation] = await this.getDataForFirebase(data)
                 // const id = subjectAndID[0] 
                 // const subject = subjectAndID[1]  
                 console.log('abc', id, subject)
                 subjects[id] = subject
+                files[index].validation = validation
+                console.log(file.name, 'validation', validation)
                 // subjects.push()
                 // xxx = {
                 //     id: subject
@@ -607,12 +610,16 @@ export default class Import extends React.Component {
                 // console.log(subjects)
                 // firebase.database().ref('/Subject2').push(subjects || 'abc')
                 // console.log('read',this.state.subjects)
-
-                console.log(`upload to Subject/${id} `)
-                firebase.database().ref('/Subject').child(id).set(subject)
-                const { professorKey } = this.props.history.location.state
-                console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
-                firebase.database().ref(`/Professor/${professorKey}/subjects/${id}`).set({ name: subject.name })
+                if (validation) {
+                    console.log(`upload to Subject/${id} `)
+                    firebase.database().ref('/Subject').child(id).set(subject)
+                    const { professorKey } = this.props.history.location.state
+                    console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
+                    firebase.database().ref(`/Professor/${professorKey}/subjects/${id}`).set({ name: subject.name })
+                    this.refs.fileComponent.removeFile(file)
+                } else {
+                    this.setState({ validation: false })
+                }
             }
             await reader.readAsBinaryString(file);
         })
@@ -620,7 +627,7 @@ export default class Import extends React.Component {
         // console.log('subjects', subjects)
         // await this.upload(subjects).then(() => { console.log('successFully') }).catch((e) => { console.log(e) })
         // console.log('hello eiei')
-        this.refs.fileComponent.removeFiles()
+        // this.refs.fileComponent.removeFiles()
     }
 
     //          storage 
@@ -742,9 +749,24 @@ export default class Import extends React.Component {
         // })
     })
 
+    checkForValidation = (subject) => {
+        let validation = true
+        if (subject.year && subject.year.length !== 4) {
+            validation = false
+        }
+        if (subject.term && subject.term.length !== 1) {
+            validation = false
+        }
+        if (subject.code && subject.code.length !== 8) {
+            validation = false
+        }
+        return validation
+    }
+
 
     getDataForFirebase = async (data) => {
         const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
+        let validation = true
         // console.log(professorID, photoUrl)
         const term = data[2]['E'].trim().split(' ')[1]
         const year = data[2]['E'].trim().split(' ')[3]
@@ -767,8 +789,14 @@ export default class Import extends React.Component {
             if (5 < indexx % 41) {
                 students[item['B'].trim()] = item['C'].trim()
                 countToCheck++
+                if (item['B'].trim().length !== 8) {
+                    validation = false
+                }
             }
         })
+        if (countToCheck.toString() !== count) {
+            validation = false
+        }
         let secForId = sec.split(' ')[1]
         const id = secForId === undefined
             ? [year, term, code].join('-')
@@ -793,7 +821,8 @@ export default class Import extends React.Component {
             professors,
             attendance: attendanceOld
         }
-        return [id, subject]
+        validation = validation && this.checkForValidation(subject)
+        return [id, subject, validation]
     }
 
     render() {
@@ -866,7 +895,7 @@ export default class Import extends React.Component {
                                 >
                                     ยืนยัน
                                 </Button>
-                                <PopUpConfirm transaction={this.state.transaction} open={this.state.openDialog} handleOpen={this.handleOpen} handleClose={this.handleClose} mode={mode} onClickConfirm={this.onClickConfirm} />
+                                <PopUpConfirm validation={this.state.validation} transaction={this.state.transaction} open={this.state.openDialog} handleOpen={this.handleOpen} handleClose={this.handleClose} mode={mode} onClickConfirm={this.onClickConfirm} />
                             </Grid>
                             <Grid item xs />
                         </Grid>

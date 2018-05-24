@@ -15,7 +15,7 @@ export default class Import extends React.Component {
         files: [],
         subjects: {},
         transaction: 'wait confirm',
-            openDialog: false
+        openDialog: false
     }
 
     handleOpen = () => {
@@ -163,13 +163,14 @@ export default class Import extends React.Component {
                 }
                 console.log(workSheet)
                 const fileIdArr = file.id.split('-')
-                const sheetName = fileIdArr[3] ? [fileIdArr[2],'(',fileIdArr[3],')'].join(' ') : fileIdArr[2]
+                const sheetName = fileIdArr[3] ? [fileIdArr[2], '(', fileIdArr[3], ')'].join(' ') : fileIdArr[2]
                 book_append_sheet(workBook, workSheet, sheetName)
                 console.log(workBook)
             })
             XLSX.writeFile(workBook, 'test.xlsx', { type: 'binary', cellStyles: true })
+            const filesC = files.map(file => ({ ...file, checked: false }))
+            this.setState({ files: filesC })
         })
-
 
         // const json = [{ A: 'a1', B: 'b1' }, { A: 'a2', B: 'b2' }, { A: 'a3', B: 'b3' }, { C: 'c3', E: 'e3' }] 
         // const aoa = [['a1','b1' ],['a2','b2' ],['a3','b3'],['','','c4','d4']]
@@ -222,7 +223,7 @@ export default class Import extends React.Component {
                             >
                                 ยืนยัน
                             </Button>
-                            <PopUpConfirm transaction={this.state.transaction} open={this.state.openDialog} handleOpen={this.handleOpen} handleClose={this.handleClose} mode={mode} onClickConfirm={this.onClickConfirm} />                            
+                            <PopUpConfirm validation={true} transaction={this.state.transaction} open={this.state.openDialog} handleOpen={this.handleOpen} handleClose={this.handleClose} mode={mode} onClickConfirm={this.onClickConfirm} />
                         </Grid>
                         <Grid item xs />
                     </Grid>

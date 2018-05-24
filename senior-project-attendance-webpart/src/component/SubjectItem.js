@@ -52,18 +52,18 @@ class SubjectItem extends React.Component {
                             <ListItem
                                 style={{
                                     // borderRadius: 0.02 * 16.25 / 19 * height, marginTop: 0.01 * 16.25 / 19 * height,
-                                    borderRadius: '1vw', border: 'thick solid rgb(15, 111, 198)',
+                                    borderRadius: '1vw', border: this.props.validation ?  'thick solid rgb(15, 111, 198)' : 'thick solid rgb(217, 83, 79)' ,
                                     fontSize: '1vw', margin: '1vw 0 1vw 0',
-                                    color: 'rgb(15, 111, 198)', backgroundColor: 'white'
+                                    color: this.props.validation ? 'rgb(15, 111, 198)' : 'rgb(217, 83, 79)' , backgroundColor: 'white'
                                 }} >
                                 <Grid container spacing={8} >
                                     <Grid item xs={4} >
-                                        <p className="time" >
+                                        <p className="name" style={{color: this.props.validation ? 'rgb(15, 111, 198)' : 'rgb(217, 83, 79)'}} >
                                             {this.props.subject.addedTime}
                                         </p>
                                     </Grid>
                                     <Grid item xs={7} >
-                                        <p className="name" >
+                                        <p className="name" style={{color: this.props.validation ? 'rgb(15, 111, 198)' : 'rgb(217, 83, 79)'}} >
                                             {name}
                                         </p>
                                     </Grid>
