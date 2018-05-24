@@ -124,7 +124,7 @@ export default class Import extends React.Component {
                     aoaForSheet[2].push(attendance[week].date.split('-').filter((d, i) => i !== 0).reverse().join('/'))
                     const students = attendance[week].students
                     aoaForSheet = aoaForSheet.map((arr, i) => {
-                        const studentKey = Object.keys(students).find(key => key === arr[1])
+                        const studentKey = Object.keys(students||{}).find(key => key === arr[1])
                         studentKey ? arr.push(this.readStatus(students[studentKey].status)) : i > 2 && arr.push('✖')
                         // console.log(aoaForSheet, student, index, students[student].status)
                         // aoaForSheet[index].push(this.readStatus(students[student].status))
@@ -167,7 +167,8 @@ export default class Import extends React.Component {
                 book_append_sheet(workBook, workSheet, sheetName)
                 console.log(workBook)
             })
-            XLSX.writeFile(workBook, 'Attendance.xls', { type: 'binary', cellStyles: true })
+            const write = XLSX.writeFile(workBook, 'Attendance.xls', { type: 'binary', cellStyles: true })
+            console.log('write',write)
             const filesC = files.map(file => ({ ...file, checked: false }))
             this.setState({ files: filesC })
         })

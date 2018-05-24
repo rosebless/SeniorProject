@@ -19,7 +19,7 @@ export default class Menu extends React.Component {
         return (
             // this.props.history.push('/page-2')
             <div>
-                <Header pageName={'เข้าสู่ระบบ'} />
+                <Header pageName={'เมนู'} />
                 <Grid container spacing={24} direction='column' style={{ height: '80vh' }} >
                     <Grid item xs />
                     <Grid container >

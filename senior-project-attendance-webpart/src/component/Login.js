@@ -55,7 +55,7 @@ export default class Login extends React.Component {
             if (key) {
                 name = result[key].name
             } else {
-                const { key: keyNew } = firebase.database().ref('/Professor').push({ professorID, photoUrl })
+                const { key: keyNew } = firebase.database().ref('/Professor').push({ name, professorID, photoUrl })
                 key = keyNew
             }
             resolve([key, name]);
@@ -84,9 +84,9 @@ export default class Login extends React.Component {
                 <Grid container spacing={24}>
                     <Grid item xs />
                     <Grid item xs={5} >
-                        <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }} 
+                        <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
                             style={{ width: '100%', color: 'rgb(15, 111, 198)', backgroundColor: 'white', fontFamily: 'bangna-new', fontSize: '2vw', borderRadius: '1vw', padding: '1vw', border: 'thick solid rgb(15, 111, 198)' }}
-                            onClick={() => setTimeout(()=>{this.buttonG.signIn()},300) } >
+                            onClick={() => setTimeout(() => { this.buttonG.signIn() }, 300)} >
                             เข้าสู่ระบบผ่าน Gmaile
                         </Button>
                     </Grid>

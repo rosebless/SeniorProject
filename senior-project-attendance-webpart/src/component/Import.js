@@ -805,11 +805,21 @@ export default class Import extends React.Component {
         console.log('sadsdassda', professorKey)
         const attendanceOld = await this.getOldAttendaceInSubject(id)
         const professors = professorsOld
-        professors.push({
-            professorID,
-            name: professorsName,
-            photoUrl
-        })
+        const indexP = professors.findIndex(professor => professor.professorID === professorID)
+        console.log('indexP',indexP)
+        if (indexP!==-1) {
+            professors[indexP] = {
+                professorID,
+                name: professorsName,
+                photoUrl
+            }
+        } else {
+            professors.push({
+                professorID,
+                name: professorsName || '',
+                photoUrl
+            })
+        }
         const subject = {
             year,
             term,
@@ -855,20 +865,20 @@ export default class Import extends React.Component {
                             <Grid item xs >
                                 <File
                                     // className='fileInput'
-                                    style={{ height: '0', width: '0' }}
+                                    // style={{ height: '0', width: '0' }}
                                     onChange={this.onInputChange} ref='fileComponent'
                                     accepts={['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']}
                                 >
-                                    <div ref={input => this.input = input} />
-                                </File>
+                                    {/* <div  /> */}
                                 <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
                                     style={{ height: '40vh', width: '40vh', backgroundColor: 'white', borderRadius: '15%', border: 'thick solid rgb(15, 111, 198)' }}
-                                    onClick={() => this.input.click()}
+                                    // onClick={() => this.input.click()}
                                 >
-                                    <div className='innerFileInput' style={{ height: '32vh', width: '35vh' }} >
+                                    <div className='innerFileInput' style={{ height: '32vh', width: '35vh' }} ref={input => this.input = input} >
                                         <img style={{ height: '20%', width: '20%' }} src={require('../photo/addButton.png')} />
                                     </div>
                                 </Button>
+                                </File>
                             </Grid>
                             <Grid item xs />
                         </Grid>
