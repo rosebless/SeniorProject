@@ -7,3 +7,34 @@
     border-color: rgb(15, 111, 198);
     background-color: white;
 }
+.check {
+    display: flex;
+    justify-content: center; 
+    align-items: center;  
+    border: solid;
+    border-width: thick;
+    border-color: rgb(15, 111, 198);
+    background-color: white; 
+    font-family: 'bangna-new';  
+    font-weight: bold;
+    color: rgb(15, 111, 198);
+}
+
+
+.React__checkbox--input {
+  display: none;
+}
+
+.React__checkbox--input {
+  
+    color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 5px;
+    border: 0px solid  rgb(15, 111, 198);
+    box-sizing: border-box;
+    transition: all 150ms;
+ 
+}

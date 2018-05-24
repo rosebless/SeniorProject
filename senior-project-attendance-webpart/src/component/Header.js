@@ -1,32 +1,25 @@
 
 import React from 'react'
-import '../css/Header.css'
+import Grid from '@material-ui/core/Grid';
+// import '../css/Header.css'
 
-export default class Import extends React.Component { 
-    render() { 
-        const { pageName, height, width } = this.props
-        // console.log(height, width)
+export default class Import extends React.Component {
+    render() {
         return (
-            <div className = 'containerHeader' style={{  
-                height: 3.75 / 19 * height,
-                width: 0.9*width
-            }}>
-              <p style={{
-                   fontSize: 1.5/19* height,
-                   fontWeight: 'bolder',
-                   color: '#fff' 
-                }}>
-                    ATTENDANCE
-                </p>
-                <p style={{
-                    fontSize: 1.5/19* height,
-                    fontWeight: 'bold',
-                    color: '#fff' 
-                }}>
-                    {pageName}
-                </p>
-            </div>
+            <Grid id='header' container spacing={24}>
+                <Grid item xs={12} sm={3} >
+                    <p className='headerTxt' > ATTENDANCE </p>
+                </Grid>
+                <Grid item xs={12} sm={6} />
+                <Grid item xs={12} sm={3} > 
+                    <p className='headerTxt' > {this.props.pageName} </p>
+                </Grid>
+            </Grid>
+            // <div id='header' >
+            //     <p className='headerTxt' > ATTENDANCE </p>
+            //     <p className='headerTxt' > {this.props.pageName} </p>
+            // </div>
         );
     }
-} 
+}
 

@@ -453,30 +453,49 @@ import React from 'react'
 import SubjectList from './SubjectList'
 import File from './FileInput'
 import XLSX from 'xlsx'
-import '../css/Import.css'
+// import '../css/Import.css'
 import Header from './Header'
 import firebase from '../config/firebase'
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import PopUpConfirm from './PopUpConfirm'
 
 export default class Import extends React.Component {
 
     state = {
         files: [],
-        width: 0,
-        height: 0,
-        subjects: {}
+        subjects: {},
+        openDialog: false,
+        transaction: 'wait confirm'
     }
 
-    componentDidMount = () => {
-        this.updateWindowDimensions();
-        window.addEventListener('resize', this.updateWindowDimensions);
-    }
+    handleOpen = () => {
+        this.setState({
+            transaction: 'wait confirm',
+            openDialog: true
+        });
+    };
 
-    componentWillUnmount = () => {
-        window.removeEventListener('resize', this.updateWindowDimensions);
-    }
+    handleClose = () => {
+        this.setState({ openDialog: false });
+    };
 
-    updateWindowDimensions = () => {
-        this.setState({ width: window.innerWidth, height: window.innerHeight });
+    onClickConfirm = () => {
+        this.state.transaction === 'finish'
+            ? setTimeout(() => { this.handleClose() }, 300)
+            : this.setState({ transaction: 'pending' }, () => {
+                // upload  
+                this.submit()
+                // animetion 
+                setTimeout(() => {
+                    this.setState({ transaction: 'finish' }, () => {
+                        // setTimeout(() => {
+                        //     this.handleClose()
+                        // }, 1000)
+                    })
+                }, 1000)
+
+            })
     }
 
     getTime = () => {
@@ -568,7 +587,10 @@ export default class Import extends React.Component {
             reader.onload = async (e) => {
                 const dataTemp = e.target.result;
                 const workbook = XLSX.read(dataTemp, { type: 'binary' });
+                console.log('workbook', workbook)
+                console.log(workbook.Sheets[workbook.SheetNames[0]])
                 const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 'A' });
+                console.log(data)
                 const [id, subject] = await this.getDataForFirebase(data)
                 // const id = subjectAndID[0] 
                 // const subject = subjectAndID[1]  
@@ -590,7 +612,7 @@ export default class Import extends React.Component {
                 firebase.database().ref('/Subject').child(id).set(subject)
                 const { professorKey } = this.props.history.location.state
                 console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
-                firebase.database().ref('/Professor').child(professorKey).child('subjects').child(id).set({ name: subject.name })
+                firebase.database().ref(`/Professor/${professorKey}/subjects/${id}`).set({ name: subject.name })
             }
             await reader.readAsBinaryString(file);
         })
@@ -701,6 +723,13 @@ export default class Import extends React.Component {
         })
     })
 
+    getOldAttendaceInSubject = (key) => new Promise((resolve, reject) => {
+        firebase.database().ref('/Subject').child(key).child('attendance').once('value').then(snapshot => {
+            // console.log(snapshot.val())
+            resolve(snapshot.val() || []);
+        })
+    })
+
     getProfessorName = () => new Promise((resolve, reject) => {
         const { professorKey } = this.props.history.location.state
         firebase.database().ref('/Professor').child(professorKey).once('value').then(snapshot => {
@@ -746,6 +775,7 @@ export default class Import extends React.Component {
             : [year, term, code, secForId].join('-')
         const professorsOld = await this.getOldProfessorInSubject(id)
         console.log('sadsdassda', professorKey)
+        const attendanceOld = await this.getOldAttendaceInSubject(id)
         const professors = professorsOld
         professors.push({
             professorID,
@@ -760,7 +790,8 @@ export default class Import extends React.Component {
             count,
             students,
             countToCheck,
-            professors
+            professors,
+            attendance: attendanceOld
         }
         return [id, subject]
     }
@@ -771,28 +802,95 @@ export default class Import extends React.Component {
         // console.log(files)
         // console.log(subjects, data)
         // console.log('from render', subjects)
-        const height = this.state.height - 20
-        const width = this.state.width - 20
-        let heightAndWidth = 0
-        if (16.25 / 19 * height < 0.4 * width) {
-            heightAndWidth = 16 / 19 * 0.5 * height
-        } else {
-            heightAndWidth = 0.4 * 0.5 * width
-        }
+        // const height = this.state.height - 20
+        // const width = this.state.width - 20
+        // let heightAndWidth = 0
+        // if (16.25 / 19 * height < 0.4 * width) {
+        //     heightAndWidth = 16 / 19 * 0.5 * height
+        // } else {
+        //     heightAndWidth = 0.4 * 0.5 * width
+        // }
         // console.log(height, width)
         return (
-            <div className='container' style={{
-                height,
-                width,
-                backgroundSize: width
-            }} >
-                <Header pageName={'เพิ่มรายวิชา'} height={height} width={width} />
-                <div className='body' style={{ height: 16.25 / 19 * height, width }} >
-                    <div className='left' style={{ height: 16.25 / 19 * height, width: 0.4 * width }} >
-                        {/* <input type='file' onChange={this.addFiles} multiple hidden
+            <div className='container' >
+                <Header pageName={'เพิ่มรายวิชา'} />
+                <Grid container spacing={24} >
+                    <Grid item xs />
+                    <Grid container spacing={24} xs={4} direction='column' style={{ height: '85vh' }} >
+                        <Grid item xl />
+                        <Grid item xl />
+                        <Grid item xl />
+                        <Grid item xl />
+                        <Grid container xl >
+                            <Grid item xs />
+                            <Grid item xs >
+                                <File
+                                    // className='fileInput'
+                                    style={{ height: '0', width: '0' }}
+                                    onChange={this.onInputChange} ref='fileComponent'
+                                    accepts={['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']}
+                                >
+                                    <div ref={input => this.input = input} />
+                                </File>
+                                <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
+                                    style={{ height: '40vh', width: '40vh', backgroundColor: 'white', borderRadius: '15%', border: 'thick solid rgb(15, 111, 198)' }}
+                                    onClick={() => this.input.click()}
+                                >
+                                    <div className='innerFileInput' style={{ height: '32vh', width: '35vh' }} >
+                                        <img style={{ height: '20%', width: '20%' }} src={require('../photo/addButton.png')} />
+                                    </div>
+                                </Button>
+                            </Grid>
+                            <Grid item xs />
+                        </Grid>
+                        <Grid item xl />
+                        <Grid container xl >
+                            <Grid item xs />
+                            <Grid item xs={6} >
+                                <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
+                                    style={{ width: '100%', color: 'rgb(15, 111, 198)', backgroundColor: 'white', fontFamily: 'bangna-new', fontSize: '1.5vw', fontWeight: 'bold', borderRadius: '1vw', border: 'thick solid rgb(15, 111, 198)' }}
+                                    onClick={() => this.input.click()}
+                                >
+                                    เพิ่มรายวิชา
+                                </Button>
+                            </Grid>
+                            <Grid item xs />
+                        </Grid>
+                        <Grid item xl />
+                        <Grid container xl >
+                            <Grid item xs />
+                            <Grid item xs={6} >
+                                <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
+                                    style={{ width: '100%', color: 'rgb(15, 111, 198)', backgroundColor: 'white', fontFamily: 'bangna-new', fontSize: '1.5vw', fontWeight: 'bold', borderRadius: '1vw', border: 'thick solid rgb(15, 111, 198)' }}
+                                    onClick={() => this.handleOpen()}
+                                >
+                                    ยืนยัน
+                                </Button>
+                                <PopUpConfirm transaction={this.state.transaction} open={this.state.openDialog} handleOpen={this.handleOpen} handleClose={this.handleClose} mode={mode} onClickConfirm={this.onClickConfirm} />
+                            </Grid>
+                            <Grid item xs />
+                        </Grid>
+                        <Grid item xl />
+                    </Grid>
+                    <Grid item xs />
+                    <Grid container xs={6} direction='column' spacing={24} >
+                        <Grid item xl />
+                        <Grid item xl />
+                        <Grid item xl />
+                        <Grid item xl >
+                            <SubjectList className='list' mode={mode} files={files} height={'65vh'}
+                                cancelSelection={this.cancelSelection} />
+                        </Grid>
+                        <Grid item xl />
+                    </Grid>
+                    <Grid item xs />
+                </Grid>
+                {/* <div className='body' style={{ height: 16.25 / 19 * height, width }} >
+                    <div className='left' style={{ height: 16.25 / 19 * height, width: 0.4 * width }} > */}
+                {/* <input type='file' onChange={this.addFiles} multiple hidden
                             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                         /> */}
-                        <File
+                {/* <File
                             className='fileInput' style={{ height: heightAndWidth, width: heightAndWidth }}
                             onChange={this.onInputChange} ref='fileComponent'
                             accepts={['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']}
@@ -826,7 +924,7 @@ export default class Import extends React.Component {
                                 cancelSelection={this.cancelSelection} />
                         </div >
                     </div>
-                </div>
+                </div> */}
             </div>
         );
     }
