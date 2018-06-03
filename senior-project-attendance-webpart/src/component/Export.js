@@ -98,11 +98,11 @@ export default class Import extends React.Component {
             files.filter(file => file.checked).forEach(file => {
                 const attendance = allSubject[file.id].attendance || {}
                 const studentsInClass = allSubject[file.id].students
+                const comment = []
                 // re structure 
-                let aoaForSheet = Object.keys(studentsInClass).map((student, i) => ([
-                    i + 1,
-                    student
-                ]))
+                let aoaForSheet = Object.keys(studentsInClass).map((student, i) => {
+                    return [i + 1, student]
+                })
                 // Header 
                 // const arr = []
                 // arr.l
@@ -120,14 +120,26 @@ export default class Import extends React.Component {
                 ])
                 // Body
                 console.log('aoaForSheet', aoaForSheet)
-                Object.keys(attendance).forEach(week => {
-                    aoaForSheet[2].push(attendance[week].date.split('-').filter((d, i) => i !== 0).reverse().join('/'))
+                Object.keys(attendance).sort((a, b) => (a.split('-')[1] - b.split('-')[1])).forEach((week, weekIndex) => {
+                    const weekText = attendance[week].date.split('-').filter((d, i) => i !== 0).reverse().join('/') // date
+                    aoaForSheet[2].push(weekText)
                     const students = attendance[week].students
                     aoaForSheet = aoaForSheet.map((arr, i) => {
-                        const studentKey = Object.keys(students||{}).find(key => key === arr[1])
-                        studentKey ? arr.push(this.readStatus(students[studentKey].status)) : i > 2 && arr.push('✖')
+                        const studentKey = Object.keys(students || {}).find(key => key === arr[1])
+                        if (weekIndex === 1) {
+                            comment[i] = ''
+                        }
+                        if (studentKey) {
+                            arr.push(this.readStatus(students[studentKey].status) || '')
+                            comment[i] = students[studentKey].comment
+                                ? comment[i] + [weekText, ':', students[studentKey].comment.split('\n').join(' , '), '\n'].join(' ')
+                                : comment[i]
+                        } else if (i > 2) {
+                            arr.push('')
+                        }
+                        // console.log('comment', i, comment[i])
                         // console.log(aoaForSheet, student, index, students[student].status)
-                        // aoaForSheet[index].push(this.readStatus(students[student].status))
+                        // aoaForSheet[index].push(this.readStatus(students[student].status)) 
                         return arr
                     })
                     // aoaForSheet = aoaForSheet.map((arr, i) => {
@@ -136,7 +148,10 @@ export default class Import extends React.Component {
                     // })
                     // console.log(aoaForSheet)
                 })
-                // add conclusion 
+
+                console.log('comment', comment)
+                // add comment & conclusion 
+                aoaForSheet[2].push('หมายเหตุ')
                 aoaForSheet[2].forEach(arr => { aoaForSheet[1].push('') })
                 aoaForSheet[1].push('สรุปผล')
                 aoaForSheet[2].push('เข้าเรียน')
@@ -144,6 +159,7 @@ export default class Import extends React.Component {
                 aoaForSheet[2].push('ขาดเรียน')
                 aoaForSheet = aoaForSheet.map((arr, i) => {
                     i > 2
+                        && arr.push(comment[i])
                         && arr.push(arr.filter(a => a === '✔').length)
                         && arr.push(arr.filter(a => a === '✱').length)
                         && arr.push(arr.filter(a => a === '✖').length)
@@ -156,11 +172,20 @@ export default class Import extends React.Component {
                 // aoaForSheet = aoaForSheet.map((arr, i) => i < 3 ? arr : arr.push(arr.filter(a => a === '✖').length))
                 // add sheet 
                 const workSheet = aoa_to_sheet(aoaForSheet, { cellStyles: true })
-                workSheet['B6'].s = {
-                    patternType: 'solid',
-                    fgColor: { theme: 8, tint: 0.3999755851924192, rgb: '9ED2E0' },
-                    bgColor: { indexed: 64 }
-                }
+                workSheet['!cols'] = [{ hidden: true }]
+                // const colsW = [{wpx: 15}]
+                // Object.keys(attendance).forEach( week => {
+                //     colsW.push({wpx: 5})
+                // } )
+                // colsW.push({wpx: 15})
+                // colsW.push({wpx: 15})
+                // colsW.push({wpx: 15})
+                // workSheet['!cols'] = colsW
+                // workSheet['B6'].s = {
+                //     patternType: 'solid',
+                //     fgColor: { theme: 8, tint: 0.3999755851924192, rgb: '9ED2E0' },
+                //     bgColor: { indexed: 64 }
+                // }
                 console.log(workSheet)
                 const fileIdArr = file.id.split('-')
                 const sheetName = fileIdArr[3] ? [fileIdArr[2], '(', fileIdArr[3], ')'].join(' ') : fileIdArr[2]
@@ -168,7 +193,7 @@ export default class Import extends React.Component {
                 console.log(workBook)
             })
             const write = XLSX.writeFile(workBook, 'Attendance.xls', { type: 'binary', cellStyles: true })
-            console.log('write',write)
+            console.log('write', write)
             const filesC = files.map(file => ({ ...file, checked: false }))
             this.setState({ files: filesC })
         })
@@ -194,7 +219,7 @@ export default class Import extends React.Component {
                 : status === 'late'
                     ? '✱'
                     : '✖'
-            : 'ไม่มีข้อมูล ?'
+            : undefined
     )
 
     render() {

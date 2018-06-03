@@ -61,8 +61,7 @@ export default class Login extends React.Component {
             resolve([key, name]);
         })
     })
-
-
+    
     responseGoogle = (response) => {
         console.log(response);
     }

@@ -1,0 +1,120 @@
+import React, { Component } from 'react';
+import { StyleSheet, Text, View, Image, Dimensions, Button } from 'react-native';
+import { DrawerNavigator, NavigationActions } from 'react-navigation';
+import DrawerHeader from './DrawerGroup/DrawerHeader';
+import { Icon, Container, Header, Content, Left } from 'native-base';
+import firebase from '../config/firebase'
+
+export default class MainPage extends React.Component {
+  // static navigationOptions = ({ navigation }) => ({
+  //   title: 'หน้าหลัก',
+  //   //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
+  //   //drawerLabel: 'Notification',
+
+  //   drawerIcon: ({ tintColor }) => (
+  //     <Image
+  //       source={require('../pics/temp1.png')}
+  //       style={styles.icon}
+  //     />
+  //   ),
+
+  // })
+  /*
+  static navigationOptions = ({navigation}) => ({
+      title: 'Main',
+      headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
+     
+  })
+  */
+
+  render() {
+    // console.log('main page',this.props.screenProps)
+    const { openDrawer } = this.props.navigation
+    const { deviceSize: { deviceHeight, deviceWidth }, userLogOn: { photoUrl, name } } = this.props.screenProps
+    if (deviceHeight < deviceWidth) {
+      var profile_height = 7 / 20 * deviceHeight
+      var profile_width = 7 / 20 * deviceHeight
+    } else {
+      var profile_height = 1 / 2 * deviceWidth
+      var profile_width = 1 / 2 * deviceWidth
+    }
+    return (
+      <View style={styles.container}>
+        <DrawerHeader openDrawer={openDrawer} deviceHeight={deviceHeight} />
+        {/* <View style={styles.page}> */}
+        <View style={[styles.top, { height: 0.4 * deviceHeight - 25, width: deviceWidth }]} >
+          <Image source={require('../pics/background.png')}
+            style={{
+              flex: 1,
+              // height: 0.5 * (deviceHeight-25) - 0.1*deviceHeight ,
+              width: deviceWidth
+            }}
+          />
+        </View>
+        <View style={styles.bot} />
+        <View style={[styles.popUp, { marginTop: 25, height: deviceHeight - 25, width: deviceWidth }]}>
+          <Image
+            source={{ uri: photoUrl }}
+            style={{
+              height: profile_height,
+              width: profile_width,
+              borderRadius: 1 / 2 * profile_height,
+              // borderWidth: 1 / 75 * profile_height,
+              // borderColor: '#0070C0',
+              // backgroundColor: '#0070C0'
+            }}
+          />
+          <Text style={{
+            marginTop: 1 / 20 * deviceHeight,
+            fontSize: 1 / 15 * deviceHeight,
+            paddingVertical: 1 / 40 * deviceHeight
+          }} >
+            {name}
+          </Text>
+        </View>
+        {/*{JSON.stringify(this.props.screenProps)}*/}
+        {/* </View> */}
+      </View>
+
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'flex-start',
+    position: 'relative',
+    marginTop: 25,
+    // backgroundColor: 'green'
+  },
+  page: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    position: 'relative',
+    // zIndex: 1
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  top: {
+    // flex: 1,
+    justifyContent: 'center',
+    // zIndex: 2
+  },
+  bot: {
+    // flex: 1
+  },
+  popUp: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    // zIndex: 10
+  }
+});
+
+
+

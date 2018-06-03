@@ -1,226 +1,233 @@
 
-// import React from 'react';
-// import { Alert, Linking, Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, TouchableOpacity, Button, Image, Animated } from 'react-native';
-// import { BarCodeScanner, Permissions } from 'expo';
-// import AppVarible from '../Model/AppVarible' 
-
-/*
-export default class Scanner extends React.Component {
-  constructor(props) {
-    super(props)
-    
-    this.state = {
-      offsetY: new Animated.Value(0),
+const project_attendance = {                // 18
+  Professor: {                              // 9 
+    firebase_key: {                         // 20 
+      name: 'string_length_60',
+      phone: 'string_length_10',
+      photoUrl: 'string_length_100',
+      professorID: 'string_length_100',
+      subjects: {                           // 8
+        subject_key: {                      // 18
+          name: 'string_length_100'
+        }
+      }
     }
-    
-    this.animateGo = this.animateGo.bind(this) 
+  },
+  Subject: {                                // 7
+    subject_key: {                          // 18
+      attendance: {                         // 10
+        week_key: {                         // 7
+          date: 'string_length_10',
+          session: 'string_length_10',
+          students: {                       // 8
+            student_id: {                   // 8
+              status: 'string_length_5',
+              time: 'string_length_27',
+              timeIn: 'string_length_27',
+              timeLate: 'string_length_27',
+              timeOut: 'string_length_27'
+            }
+          }
+        }
+      },
+      code: 'string_length_8',
+      count: 'string_length_3',
+      log: {                                 // 3
+        attendance: {                        // 10
+          firebase_key: {                    // 20 
+            change: 'string_length_15',
+            comment: 'string_length_200',
+            date: 'string_length_25',
+            professorID: 'string_length_100',
+            student: 'string_length_8',
+            time: 'string_length_25',
+            week: 'string_length_7'
+          }
+        }
+      },
+      name: 'string_length_100',
+      professors: {                          // 10 
+        key: {                               // 1 
+          name: 'string_length_60',
+          photoUrl: 'string_length_100',
+          professorID: 'string_length_100',
+          timeIn: 'string_length_5',
+          timeLate: 'string_length_5',
+          timeOut: 'string_length_5'
+        }
+      },
+      students: {                             // 8 
+        student_id: 'string_length_60'
+      },
+      term: 'string_length_1',
+      year: 'string_length_4'
+    }
   }
-  
-
-
-  render() {
-    let animeteStyle = { transform: [{translateY: this.state.offsetY}] }
-    return (
-      <View style={styles.container}>
-      <Animated.View style={[styles.topBar, animeteStyle, { height: 80 }]}>
-        <Image
-          source={require('../pics/temp4.png')}
-          style={[styles.statusIcon, {
-            height: 50,
-            width: 50,
-          }]}
-        />
-       
-      </Animated.View>
-        <Button title="Test" onPress={()=>{this.animateGo()}} />
-      </View>
-    );
-  }
-
-
-  animateGo = () => { 
-    Animated.sequence([
-      Animated.timing(
-      this.state.offsetY, { 
-        toValue: 80,
-        duration: 1000,
-       }),
-       Animated.timing(
-        this.state.offsetY, { 
-          toValue: 0,
-          duration: 1000,
-         })]
-    )
-    .start();
-
-    //return this.state.students.map(student => <OutPutPopUP key={student} icon={statusIcon} text={outputText} />)
-
-  };
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  topBar: {
-    position: 'absolute',
-    top: -80,
-    left: 0,
-    right: 0,
-    //backgroundColor: rgb(255,255,255,0.3),
-    padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statusIcon: {
-    marginLeft: 10,
-  },
-  codeText: {
-    flex: 1,
-    color: '#000',
-    textAlignVertical: "center",
-    textAlign: 'center',
-  },
-  successText: {
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#000',
-  },
-  summitButtonText: {
-    //flex: 1,
-    textAlignVertical: 'bottom',
-    textAlign: 'center',
-    backgroundColor: '#0070C0',
-    color: '#FFFFFF',
-  }
-});
+// typeof (project_attendance)==='object'  the return is true
 
-class OutPutPopUP extends React.Component {
-  constructor(props) {
-    super(props)
-    const { deviceSize: { deviceHeight, deviceWidth } } = AppVarible.appVarible
-    this.state = {
-      deviceHeight,
-      deviceWidth,
-      yPosition: new Animated.Value(1 / 10 * deviceHeight)
-    }
-  }
-
-  componentDidMount() {
-    Animated.sequence([
-      Animated.timing(this.state.yPosition, {
-        toValue: 0,
-        duration: 500
-      }),
-      Animated.timing(this.state.yPosition, {
-        toValue: 1 / 10 * this.state.deviceHeight,
-        duration: 500
-      })
-    ])
-      .start();       // many event use Animated.parallel([event1,event2])
-
-  }
-
-  render() {
-    let animetionStyle = {
-      transform: [{ transparentY: this.state.yPosition }]
-    }
-    const { deviceHeight, deviceWidth } = this.state
-    return (
-      <Animated.View style={[styles.topBar, animetionStyle, { height: 1 / 10 * deviceHeight }]}>
-        <Image
-          source={this.props.icon}
-          style={[styles.statusIcon, {
-            height: 1 / 10 * 7 / 10 * deviceHeight,
-            width: 1 / 10 * 7 / 10 * deviceHeight,
-          }]}
-        />
-        <Text numberOfLines={1} style={[styles.codeText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight }]}>
-          {this.props.key}
-        </Text>
-        <Text style={[styles.successText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight }]}>
-          {this.props.text}
-        </Text>
-      </Animated.View>
-    );
-  }
+count_the_string = (obj) => {
+  const result = {}
+  Object.keys(obj).forEach(key => {
+    result[key] = typeof (obj[key]) === 'object'
+      ? count_the_string(obj[key])
+      : key.length + parseInt(obj[key].split('_')[2])
+  })
+  return result
 }
-*/
 
-// export default class Test extends React.Component {
-//   constructor(props){
-//     super(props)
-//     this.state = { 
-//       counter: 0, 
-//       students: [] 
+// console.log(count_the_string(project_attendance))
+// console.log(count_the_string(project_attendance).Professor.firebase_key.subjects)
+// console.log(count_the_string(project_attendance).Subject.subject_key.attendance)
+// console.log(count_the_string(project_attendance).Subject.subject_key.attendance.week_key.students.student_id)
+// console.log(count_the_string(project_attendance).Subject.subject_key.log)
+// console.log(count_the_string(project_attendance).Subject.subject_key.professors)
+// console.log(count_the_string(project_attendance).Subject.subject_key.students)
+
+// output 
+// project_attendance = {         // 18
+//   Professor: {                 // 9
+//     firebase_key: {            // 20 
+//       name: 64,
+//       phone: 15,
+//       photoUrl: 108,
+//       professorID: 111,
+//       subjects: {              // 8
+//         subject_key: {         // 18
+//           name: 104
+//         }
+//       }
+//     }
+//   },
+//   Subject: {                   // 7
+//     subject_key: {             // 18 
+//       attendance: {            // 10 
+//         week_key: {            // 7 
+//           date: 14,
+//           session: 17,
+//           students: {          // 8
+//             student_id: {      // 8 
+//               status: 11,
+//               time: 31,
+//               timeIn: 33,
+//               timeLate: 35,
+//               timeOut: 34
+//             }
+//           }
+//         }
+//       },
+//       code: 12,
+//       count: 8,
+//       log: {                   // 3
+//         attendance: {          // 10
+//           firebase_key: {      // 20 
+//             change: 21,
+//             comment: 207,
+//             date: 29,
+//             professorID: 111,
+//             student: 15,
+//             time: 29,
+//             week: 11
+//           }
+//         }
+//       },
+//       name: 104,
+//       professors: {            // 10
+//         key: {                 // 1
+//           name: 64,
+//           photoUrl: 108,
+//           professorID: 111,
+//           timeIn: 11,
+//           timeLate: 13,
+//           timeOut: 12
+//         }
+//       },
+//       students: {              // 8 
+//         student_id: 70
+//       },
+//       term: 5,
+//       year: 8
 //     }
 //   }
-
-//   count = () => {
-//     let counter = this.state.counter 
-//     let students = this.state.students 
-//     counter++ 
-//     students.push(counter)
-//     this.setState({ students, counter })
-
-//   }
-
-//   summit = () => { 
-//     let re = '' 
-//     this.state.students.forEach(s => {
-//       re = re + s + '\n'
-//     });
-//     Alert.alert(
-//       'ABC eiei', 
-//       re ,
-//       [
-//         { text: 'ใช่', onPress: () => { AppVarible.appVarible.navigationSaved.scanning.navigate('ByPassToDashboard') } },
-//         { text: 'ไม่ใช่', onPress: () => { } },
-//       ],
-//       { cancellable: false }
-//     )
-//   }
-
-//   render() {
-//     return (
-//       <View>
-//         <Text>{this.state.counter}</Text>
-//         <Text>{this.state.students}</Text>
-//       <Button title='count' onPress={()=>{this.count()}} /> 
-//       <Button title='Summit' onPress={()=>{this.summit()}} /> 
-//       </View>
-//     );
-//   }
-
-// }
-
-// test = { 
-//   a: 'a'
-// }
-
-// console.log(test.b,test['b']) 
-
-// if(test['b']){
-//   console.log(test['b']) 
-// } else {
-//   console.log('test') 
 // } 
 
-// var test = '57050070@kmitl.ac.th' 
+sum_the_string = (obj) => {
+  const result = {}
+  Object.keys(obj).forEach(key => {
+    if (typeof (obj[key]) === 'object') {
+      result[key] = sum_the_string(obj[key])
+    } else {
+      result['sum'] = result['sum'] ? result['sum'] + obj[key] : obj[key]
+    }
+  })
+  return result
+}
 
-// var s = test.split('.').join('')
+// console.log(sum_the_string(count_the_string(project_attendance)))
+// console.log(sum_the_string(count_the_string(project_attendance).Professor.firebase_key.subjects))
+// console.log(sum_the_string(count_the_string(project_attendance).Subject.subject_key.attendance))
+// console.log(sum_the_string(count_the_string(project_attendance).Subject.subject_key.attendance.week_key.students.student_id))
+// console.log(sum_the_string(count_the_string(project_attendance).Subject.subject_key.log))
+// console.log(sum_the_string(count_the_string(project_attendance).Subject.subject_key.professors))
+// console.log(sum_the_string(count_the_string(project_attendance).Subject.subject_key.students))
 
-// console.log(s) 
-
-// //var test1
-
-// if(test1){
-//   console.log('true')
-// } else {
-//   console.log('flase')
+// Out put
+// project_attendance = {
+//   Professor: {                          // 10 + (320 + 120 * s) * p
+//     firebase_key: {                     // (320 + 120 * s) * p
+//       sum: 298,
+//       subjects: {                       // 120 * s 
+//         subject_key: {
+//           sum: 104
+//         }
+//       }
+//     }
+//   },
+//   Subject: {                      // 7 + (200 + 320 * p + 70 * s + 450 * c + (50 + 150 * s1) * w) * st
+//     subject_key: {                // (50 + 150 * s1) * w
+//       attendance: {
+//         week_key: {
+//           sum: 31,
+//           students: {             // 150 * s1 
+//             student_id: {    
+//               sum: 144
+//             }
+//           }
+//         }
+//       },
+//       sum: 137,
+//       log: {                      // 450 * c 
+//         attendance: {
+//           firebase_key: {
+//             sum: 423
+//           }
+//         }
+//       },
+//       professors: {               // 320 * p
+//         key: {
+//           sum: 319
+//         }
+//       },
+//       students: {                 //  70 * s 
+//         sum: 70
+//       }
+//     }
+//   }
 // }
+
+const subjectsOfProfessor = 20
+const numOfProfessor = 10000
+
+fn1 = (s, p) => 10 + (320 + 120 * s) * p
+
+const professorsOfSubject = 5
+const studentsInSubject = 350
+const editInSubject = 100
+const weekOfSubject = 20
+const studentInClass = 350
+const numOfSubject = 865
+
+fn2 = (p, s, c, w, s1, st) => 7 + (200 + 320 * p + 70 * s + 450 * c + (50 + 150 * s1) * w) * st
+
+console.log(1000000000 - (fn1(subjectsOfProfessor, numOfProfessor) + fn2(professorsOfSubject, studentsInSubject, editInSubject, weekOfSubject, studentInClass, numOfSubject)))       

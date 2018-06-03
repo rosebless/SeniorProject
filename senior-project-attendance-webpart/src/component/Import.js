@@ -827,7 +827,7 @@ export default class Import extends React.Component {
             name,
             count,
             students,
-            countToCheck,
+            // countToCheck,
             professors,
             attendance: attendanceOld
         }
