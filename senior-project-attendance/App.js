@@ -1,11 +1,8 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import DrawerNavigator from './src/layout/DrawerNavigator';
+import { Dimensions } from 'react-native';
 import Navigators from './src/layout/Navigators'
-import LoginNavigator from './src/layout/LoginNavigator'
 import { setCustomText } from 'react-native-global-props';
 import { Font } from 'expo'
-
 
 export default class App extends React.Component {
   state = {
@@ -41,14 +38,13 @@ export default class App extends React.Component {
     });
     const customTextProps = {
       style: {
-        fontFamily: 'LayijiMahaniyomV105' 
+        fontFamily: 'LayijiMahaniyomV105'
         // backgroundColor:'green'
-      }  
+      }
     }
-    setCustomText(customTextProps); 
-    this.setState({ fontLoaded: true})
+    setCustomText(customTextProps);
+    this.setState({ fontLoaded: true })
   }
-
   setUserLogOn = (value) => {
     this.setState({ userLogOn: value })
   }
@@ -66,7 +62,7 @@ export default class App extends React.Component {
   }
   changeActivateStatus = (index) => {
     this.setState((prevState, props) => ({
-      status: prevState.status.map((s, sIndex) => index == sIndex)
+      status: prevState.status.map((s, sIndex) => index === sIndex)
     }));
   }
   render() {
@@ -78,10 +74,6 @@ export default class App extends React.Component {
           setUserLogOn: this.setUserLogOn, selectFocus: this.selectFocus, switchByPass: this.switchByPass, setDescriptionForSelector: this.setDescriptionForSelector,
           changeActivateStatus: this.changeActivateStatus
         }} />
-
-      // <View>
-      // <TimePicker deviceSize={this.state.deviceSize} /> 
-      // </View>
     );
   }
 }

@@ -1,253 +1,43 @@
-/*
-import React from 'react';
-import { Alert, Linking, Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, TouchableOpacity, Button, Image } from 'react-native';
-import { BarCodeScanner, Permissions } from 'expo';
-//import { Button } from 'native-base';
-
-import sIconSuccess from '../../../pics/temp5.png'
-import sIconFail from '../../../pics/temp4.png'
-import AppVarible from '../../../Model/AppVarible'
-
-export default class Scanner extends React.Component {
-  static navigationOptions = ({ navigation }) => ({
-    header: false,
-  });
-  state = {
-    hasCameraPermission: null,
-    lastScannedCode: null,
-    students: '',
-    studentList: [],
-    //backgroundColorOutput: 'rgba(255,255,255,0.3)' 
-  };
-
-  componentDidMount() {
-    this._requestCameraPermission();
-  }
-
-  _requestCameraPermission = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({
-      hasCameraPermission: status === 'granted',
-    });
-  };
-
-  _handleBarCodeRead = result => {
-    if (result.data !== this.state.lastScannedCode) {
-      LayoutAnimation.spring();
-      this.setState({ lastScannedCode: result.data });
-    }
-  };
-
-  render() {
-
-    const { navigate } = this.props.navigation;
-
-    return (
-      <View style={styles.container}>
-        {this.state.hasCameraPermission === null
-          ? <Text>กำลังขออนุญาตจากกล้อง</Text>
-          : this.state.hasCameraPermission === false
-            ? <Text style={{ color: '#fff' }}>
-              ไม่ได้รับอนุญาตจากกล้อง
-                    </Text>
-            : 
-            <BarCodeScanner
-              onBarCodeRead={this._handleBarCodeRead}
-              //style={{ height: 300, width: 300 }}
-              style={{
-                height: deviceHeight - 25,
-                width: deviceWidth,
-                //justifyContent: 'center',
-                //backgroundColor: 'transparent'
-                marginTop: 25
-              }}
-            >
-            <View style={{flex:4, backgroundColor: 'transparent'}} />
-            <View style={{flex:1, justifyContent: 'center', alignItems: 'center', width: deviceWidth, backgroundColor: 'rgba(255,255,255,0.3)' }} >
-            <TouchableOpacity onPress={this._handlePressSummit} >
-              <Text style={styles.summitButtonText} > เสร็จสิ้น </Text>
-            </TouchableOpacity>
-            </View>
-            </BarCodeScanner>
-            
-          }
-
-        {this._maybeRenderUrl()}
-
-        <StatusBar hidden />
-      </View>
-    );
-  }
-
-  _handlePressSummit = () => {
-    
-       Alert.alert(
-          'ยืนยันการเช็คชื่อ ?',
-          studentss,
-          [
-            { text: 'ใช่', /*onPress: () => Linking.openURL(this.state.lastScannedUrl),*//* onPress: ()=> {AppVarible.navigationSaved.scanning.navigate('ByPassToDashboard') } },
-{ text: 'ไม่ใช่', onPress: () => {} },
-],
-{ cancellable: false }
-);
-};
-
-_handleShowStudentList = () => {
-this.setState({students: 'รหัสนักศึกษา'})
-this.state.studentList.forEach(student => this.setState({students: this.state.students + '\n' + student}) )
-};
-
-_handlePressCancel = () => {
-this.setState({ lastScannedCode: null });
-};
-
-_handleChangeBackgroundColorOutput = () => {
-this.setState({ lastScannedCode: null });
-};
-
-_maybeRenderUrl = () => {
-if (!this.state.lastScannedCode) {
-//this.setState({backgroundColorOutput:'rgba(255,255,255,0)'})
-return;
-}
-
-if (this.state.lastScannedCode) { //ตรวจสอบรายชื่อ
-var statusIcon = require('../../../pics/temp5.png')
-//studentss = studentss  + this.state.lastScannedCode + '\n'
-//this.setState({students: 'รหัสนักศึกษา'})
-//studentList = [...studentList, this.state.lastScannedCode]
-var outputText = 'สำเร็จ' 
-} else {
-var statusIcon = require('../../../pics/temp4.png')
-var outputText = 'ไม่สำเร็จ' 
-}
-/*this.setState({backgroundColorOutput:'rgba(255,255,255,0.3)'}) */ /* //backgroundColorOutput = 'rgba(255,255,255,0)'
-return (
-  <View style={styles.topBar}> 
-    <Image
-    source={statusIcon}
-    style={styles.statusIcon} 
-    />
-    {/*<TouchableOpacity style={styles.url} onPress={this._handlePressUrl}>*/ /*}
-<Text numberOfLines={1} style={styles.codeText}>
-{this.state.lastScannedCode}
-</Text>
-{/*</TouchableOpacity>
-<TouchableOpacity 
-style={styles.cancelButton}
-onPress={this._handlePressCancel}>*/ /*} 
-  <Text style={styles.successText}> {outputText} </Text> 
-{/*</TouchableOpacity>*/ /*}
-</View>
-);
-//setTimeout(() => {
-//  backgroundColorOutput = 'rgba(255,255,255,0)'
-//}, 2000);
-};
-}
-
-//let backgroundColorOutput = 'rgba(255,255,255,0.3)'
-let studentss = ''
-let studentList = [] 
-//let statusIcon = sIconSuccess
-let deviceHeight = Dimensions.get('window').height
-let deviceWidth = Dimensions.get('window').width
-
-const styles = StyleSheet.create({
-container: {
-flex: 1,
-alignItems: 'center',
-justifyContent: 'center',
-backgroundColor: '#000',
-},
-topBar: {
-position: 'absolute',
-top: 0,
-left: 0,
-right: 0,
-//backgroundColor: this.state.backgroundColorOutput,
-padding: 15,
-flexDirection: 'row',
-height: 1/10*deviceHeight,
-alignItems: 'center',
-justifyContent: 'center',
-},
-statusIcon: {
-marginLeft: 10 ,
-height: 1/10*7/10*deviceHeight,
-width: 1/10*7/10*deviceHeight
-},
-codeText: {
-flex: 1,
-color: '#000',
-fontSize: 1/10*3/10*deviceHeight,
-textAlignVertical: "center",
-textAlign: 'center',
-},
-successText: {
-marginLeft: 10,
-alignItems: 'center',
-justifyContent: 'center',
-color: '#000',
-fontSize: 1/10*3/10*deviceHeight
-},
-summitButtonText: {
-//flex: 1,
-textAlignVertical: 'bottom',
-textAlign: 'center',
-height: 1/10*deviceHeight,
-width: 3/4*deviceWidth,
-backgroundColor: '#0070C0',
-color: '#FFFFFF',
-fontSize: 1/20*deviceHeight,
-borderRadius: 1/2*1/10*deviceHeight,
-}
-});
-*/
-
 
 import React from 'react';
-import { Alert, Linking, Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, TouchableOpacity, Button, Image, Animated, ActivityIndicator } from 'react-native';
+import { Alert, LayoutAnimation, Text, View, StyleSheet, TouchableOpacity, Image, Animated, ActivityIndicator } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
-// import AppVarible from '../../../Model/AppVarible'
 import firebase from '../../config/firebase'
-import ByPassToDashboard from './ByPassToDashboard';
 import CustomButton from '../CustomButton'
 
 export default class Scanner extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      hasCameraPermission: null,
-      lastScannedCode: null,
-      students: {},
-      studentsInClass: [],
-      studentsOld: [],
-      timeIn: '',
-      timeLate: '',
-      timeOut: '',
-      session: '',
-      date: '',
-      classKey: '',
-      statusColor: 'white',
-      statusOutput: 'eiei',
-      offsetY: new Animated.Value(0),
-      enabledBackButton: true,
-      uploading: false
-    }
+  state = {
+    hasCameraPermission: null,
+    lastScannedCode: null,
+    students: {},
+    studentsInClass: [],
+    studentsOld: {},
+    timeIn: '',
+    timeLate: '',
+    timeOut: '',
+    date: '',
+    weekDay: '',
+    classKey: '',
+    statusColor: 'white',
+    statusOutput: 'eiei',
+    offsetY: new Animated.Value(0),
+    enabledBackButton: true,
+    uploading: false
   }
+
   static navigationOptions = ({ navigation }) => ({
     header: false,
   });
 
-  componentWillMount = () => {
+  componentDidMount() {
     this.setState({ uploading: true }, () => {
+      this._requestCameraPermission();
       this.getStudentFormFirebase()
     })
   }
 
-  componentDidMount() {
-    this._requestCameraPermission();
+  componentWillUnmount = () => {
+    firebase.database().ref('/Subject').child(this.props.screenProps.focus.id).off('value')
   }
 
   _requestCameraPermission = async () => {
@@ -267,14 +57,12 @@ export default class Scanner extends React.Component {
 
   getStudentFormFirebase = () => {
     const { focus: { id }, userLogOn: { professorID } } = this.props.screenProps
-    firebase.database().ref('/Subject').child(id).once('value', snapshot => {
-      // console.log(snapshot.val()) 
+    firebase.database().ref('/Subject').child(id).on('value', snapshot => {
       const objSubject = snapshot.val()
       const studentsInClass = Object.keys(objSubject.students)
-      // console.log(studentsInClass)
       this.setState({ studentsInClass })
       const currentProfessorKey = Object.keys(objSubject.professors).find(key => objSubject.professors[key].professorID == professorID)
-      this.getTimeForAttendance(objSubject.attendance, objSubject.professors[currentProfessorKey].timeIn, objSubject.professors[currentProfessorKey].timeLate, objSubject.professors[currentProfessorKey].timeOut)
+      this.getTimeForAttendance(objSubject.attendance, objSubject.professors[currentProfessorKey].timeIn, objSubject.professors[currentProfessorKey].timeLate, objSubject.professors[currentProfessorKey].timeOut, objSubject.professors[currentProfessorKey].weekDay)
       // this.genData()
     })
   }
@@ -298,35 +86,75 @@ export default class Scanner extends React.Component {
     })
   }
 
-  getTimeForAttendance = (attendance = [], timeIn = '', timeLate = '', timeOut = '') => {
-    const option = { year: 'numeric', month: 'numeric', day: 'numeric' } // day/month/year 
-    const today = (new Date().toLocaleDateString('th-TH', option)).split('/').reverse().join('-')
-    console.log('today', today)
-    const hourCheck = timeIn.split(':')
-    const session
-      = hourCheck < 6 ? 'midnight'
-        : hourCheck < 13 ? 'morning'
-          : hourCheck < 17 ? 'afternoon'
-            : hourCheck < 21 ? 'evening'
-              : 'night'
-    // const classKey = Object.keys(attendance).find(key => attendance[key].date == today && attendance[key].session == session)
-    const classKey = undefined
-    // console.log(Object.keys(attendance[classKey].students || {}))
-    classKey
-      ? this.setState({ classKey, studentsOld: Object.keys(attendance[classKey].students || {}), date: attendance[classKey].date, session: attendance[classKey].session })
-      : this.setState({ classKey: ['week', Object.keys(attendance).length + 1].join('-'), date: today, session })
-    this.setState({ uploading: false, timeIn, timeLate, timeOut })
+  getTimeForAttendance = (attendance = [], timeIn = '', timeLate = '', timeOut = '', weekDay = '') => {
+    const option = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'long', hour: 'numeric', minute: 'numeric' } // วันพฤหัสบดี day/month/year hh:mm
+    const todayArr = (new Date().toLocaleDateString('th-TH', option)).split(' ')
+    const weekDayOfToDay = todayArr[0]
+    const today = todayArr[1].split('/').join('-')
+    const [hour, minute] = todayArr[2].split(':')
+    const [hourIn, minuteIn] = timeIn.split(':')
+    const [hourOut, minuteOut] = timeOut.split(':')
+
+    if (timeIn === '' || timeLate === '' || timeOut === '' || weekDay === '') {
+      Alert.alert(
+        'ยังไม่ได้ตั้งค่าเวลา',
+        'กรุณาตรวจสอบการตั้งค่าเวลา \n ไปยังหน้าตั้งค่าเวลา',
+        [
+          {
+            text: 'ตกลง', onPress: () => {
+              this.props.screenProps.setDescriptionForSelector('รายวิชา', require('../../pics/manageSubjectPage.png'), 'Manager')
+              this.props.screenProps.changeActivateStatus(2)
+              this.props.navigation.navigate('Manager')
+            }
+          },
+          { text: 'ยกเลิก', onPress: () => { this.props.navigation.navigate('Selector') } },
+        ],
+        { cancellable: false }
+      )
+    } else if (weekDay === weekDayOfToDay
+      && (parseInt(hourIn, 10) < parseInt(hour, 10) || (hourIn === hour && parseInt(minuteIn, 10) <= parseInt(minute, 10)))
+      && (parseInt(hour, 10) < parseInt(hourOut, 10) || (hour === hourOut && parseInt(minute, 10) <= parseInt(minuteOut, 10)))
+    ) {
+      const classKey = Object.keys(attendance).find(key => {
+        const [hourInLastModify, minuteInLastModify] = attendance[key].timeInLastModify ? attendance[key].timeInLastModify.split(':') : '00:00'
+        const [hourOutLastModify, minuteOutLastModify] = attendance[key].timeOutLastModify ? attendance[key].timeOutLastModify.split(':') : '00:01'
+        return (attendance[key].date === today &&
+          !(
+            parseInt(hourOut, 10) < parseInt(hourInLastModify, 10) || (hourOut === hourInLastModify && parseInt(minuteOut, 10) <= parseInt(minuteInLastModify, 10)) || // timeOut <= attendance[key].timeIn 
+            parseInt(hourOutLastModify, 10) < parseInt(hourIn, 10) || (hourOutLastModify === hourIn && parseInt(minuteOutLastModify, 10) <= parseInt(minuteIn, 10)) // attendance[key].timeOut <= timeIn
+          ))
+      })
+      // const classKey = undefined
+      classKey
+        ? this.setState({ classKey, studentsOld: attendance[classKey].students || {} })
+        : this.setState({ classKey: ['week', Object.keys(attendance).length + 1].join('-') })
+      this.setState({ uploading: false, timeIn, timeLate, timeOut, date: today, weekDay: weekDayOfToDay })
+    } else {
+      Alert.alert(
+        'เวลาไม่ถูกต้อง',
+        'กรุณาตรวจสอบการตั้งค่าเวลา \n ไปยังหน้าตั้งค่าเวลา',
+        [
+          {
+            text: 'ตกลง', onPress: () => {
+              this.props.screenProps.setDescriptionForSelector('รายวิชา', require('../../pics/manageSubjectPage.png'), 'Manager')
+              this.props.screenProps.changeActivateStatus(2)
+              this.props.navigation.navigate('Manager')
+            }
+          },
+          { text: 'ยกเลิก', onPress: () => { this.props.navigation.navigate('Selector') } },
+        ],
+        { cancellable: false }
+      )
+    }
   }
 
   attendance = (student, checkSuccess, checkWarning, checkFail, finishingOutput) => {
     console.log(this.isInClass(student))
     if (this.isInClass(student) && !this.isDuplicate(student)) { //ตรวจสอบรายชื่อ  
-      // console.log('true')
       this.updateStudens(student, checkSuccess, checkWarning, checkFail)
     } else if (this.isDuplicate(student)) { // เคยเช็คไปแล้ว 
       checkWarning('ข้อมูลซ้ำ')
     } else { // ไม่มีอยู่ในรายชื่อ
-      // console.log('false')
       checkFail('ไม่สำเร็จ')
     }
     // Animation output 
@@ -335,7 +163,6 @@ export default class Scanner extends React.Component {
 
   checkSuccess = (text) => {
     this.setState({
-      // statusIcon: require('../../../pics/temp5.png'), 
       statusColor: '#3eee26',
       statusOutput: text
       //studentsText
@@ -344,7 +171,6 @@ export default class Scanner extends React.Component {
 
   checkWarning = (text) => {
     this.setState({
-      // statusIcon: require('../../../pics/temp4.png'), 
       statusColor: '#ffc000',
       statusOutput: text
     })
@@ -352,7 +178,6 @@ export default class Scanner extends React.Component {
 
   checkFail = (text) => {
     this.setState({
-      // statusIcon: require('../../../pics/temp4.png'),
       statusColor: '#ff0000',
       statusOutput: text
     })
@@ -392,13 +217,13 @@ export default class Scanner extends React.Component {
     // const [hourOut, minuteOut] = parseInt(timeOut.split(':')[1]) + 30 > 60
     //   ? [parseInt(timeOut.split(':')[0]) + 1, parseInt(timeOut.split(':')[1]) - 30]
     //   : [parseInt(timeOut.split(':')[0]), parseInt(timeOut.split(':')[1]) + 30]
-    if (hour < hourIn || (hour == hourIn && minute < minuteIn)) { // hour > hourOut || (hour == hourOut && minute > minuteOut)
+    if (hour < hourIn || (hour === hourIn && minute < minuteIn)) { // hour > hourOut || (hour == hourOut && minute > minuteOut)
       checkFail('เวลาไม่ถูกต้อง')
     } else {
       const [status, output, textOutput]
-        = hour < hourLate || (hour == hourLate && minute <= minuteLate)
+        = hour < hourLate || (hour === hourLate && minute <= minuteLate)
           ? ['atten', checkSuccess, 'สำเร็จ']
-          : hour < hourOut || (hour == hourOut && minute <= minuteOut)
+          : hour < hourOut || (hour === hourOut && minute <= minuteOut)
             ? ['late', checkWarning, 'มาสาย']
             : ['absent', checkFail, 'ขาดเรียน']
       output(textOutput)
@@ -410,19 +235,6 @@ export default class Scanner extends React.Component {
       //   timeLate,
       //   timeOut
       // } 
-      // console.log('timeIn', timeIn)
-      // console.log('timeLate', timeLate)
-      // console.log('hour', hour)
-      // console.log('minute', minute)
-      // console.log('second', second)
-      // console.log('hourIn', hourIn)
-      // console.log('minuteIn', minuteIn)
-      // console.log('hourLate', hourLate)
-      // console.log('minuteLate', minuteLate)
-      // console.log('hourOut', hourOut)
-      // console.log('minuteOut', minuteOut)
-      // console.log('status', status)
-      // console.log('textOutput', textOutput)
       this.setState((prevState) => {
         students = prevState.students
         students[student] = {
@@ -446,22 +258,14 @@ export default class Scanner extends React.Component {
 
   isDuplicate = (student) => (
     Object.keys(this.state.students).some(studentChecking => student === studentChecking)
-    || this.state.studentsOld.some(studentChecking => student === studentChecking)
+    || Object.keys(this.state.studentsOld).some(studentChecking => student === studentChecking)
   )
 
   manualButton = () => {
-    // const { navigation: { navigate }, screenProps: { focus } } = this.props
     this.props.navigation.navigate('ManualAttendance', { attendance: this.attendance })
   }
 
   summitButton = () => {
-    // for(let i = 1 ; i < this.state.students.length ; i++){
-    //   if(i!=this.state.students.length-1) {
-    //     result = result + this.state.students[i] + '\n'
-    //   } else {
-    //     result = result + this.state.students[i] 
-    //   } 
-    // }
     let result = ''
     const { students } = this.state
     Object.keys(students).forEach(s => {
@@ -472,7 +276,6 @@ export default class Scanner extends React.Component {
     result = result.substring(0, result.length - 1)
     const { deviceSize, focus } = this.props.screenProps
     console.log('Scanner focus', focus)
-    // console.log(students)
     Alert.alert(
       title,
       result,
@@ -493,20 +296,21 @@ export default class Scanner extends React.Component {
 
   upload = () => {
     const { id } = this.props.screenProps.focus
-
-    const { classKey, students, session, date } = this.state
+    const { classKey, students, studentsOld, date, weekDay, timeIn, timeLate, timeOut } = this.state
     console.log('start set firebase')
-    // console.log(students)
-    // console.log(studentsOld)
     firebase.database().ref('/Subject').child(id).child('attendance').child(classKey).set({
-      students,
-      session,
-      date
+      students: { ...studentsOld, ...students },
+      date,
+      weekDay,
+      timeInLastModify: timeIn,
+      timeLateLastModify: timeLate,
+      timeOutLastModify: timeOut
     })
     console.log('end set firebase')
   }
 
   byPassToDashboard = () => {
+    this.props.screenProps.setDescriptionForSelector('สรุปผล', require('../../pics/dashboardPage.png'), 'Dashboard')
     this.props.screenProps.changeActivateStatus(4)
     this.props.navigation.navigate('Dashboard')
   }
@@ -606,9 +410,6 @@ export default class Scanner extends React.Component {
 
               <View style={styles.backgroundTop} />
               <View style={styles.backgroundCenter} >
-                {/* <View style={styles.backgroundCenterLeft} /> 
-                <View style={[styles.backgroundScanBox, { height: 3/20 * deviceHeight }]} />
-                <View style={styles.backgroundCenterRight} />  */}
               </View>
               <View style={styles.backgroundBot} />
 
@@ -617,13 +418,6 @@ export default class Scanner extends React.Component {
                 top: -1 / 10 * deviceHeight,
                 backgroundColor: statusColor
               }]}>
-                {/* <Image
-                  source={this.state.statusIcon}
-                  style={[styles.statusIcon, {
-                    height: 1 / 10 * 7 / 10 * deviceHeight,
-                    width: 1 / 10 * 7 / 10 * deviceHeight,
-                  }]}
-                /> */}
                 <Text numberOfLines={1} style={[styles.codeText, { fontSize: 1 / 10 * 3 / 10 * deviceHeight, paddingVertical: 3 / 100 * deviceHeight }]}>
                   {lastScannedCode}
                 </Text>
@@ -653,7 +447,6 @@ export default class Scanner extends React.Component {
 
               <View style={[styles.countStudents, {
                 height: 1 / 10 * deviceHeight,
-                // width: 2 / 3 * deviceWidth - (3 / 10 * deviceWidth),
                 left: 1 / 10 * deviceWidth,
                 bottom: 2 / 10 * deviceHeight
               }]} >
@@ -684,51 +477,6 @@ export default class Scanner extends React.Component {
                 }}
                 text={'ยืนยัน'}
               />
-              {/* <TouchableOpacity onPress={() => { this.manualButton() }} style={[styles.summitButton, {
-                height: 1 / 10 * deviceHeight,
-                width: 2 / 3 * deviceWidth - 3 / 20 * deviceWidth,
-                left: 1 / 20 * deviceWidth,
-                bottom: 1.5 / 20 * deviceHeight,
-                borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-              }]} >
-                <Text style={[styles.summitButtonText, {
-                  fontSize: 1 / 15 * deviceHeight,
-                  paddingVertical: 1 / 60 * deviceHeight
-                }]} >
-                  กรอกรหัส
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => { this.summitButton() }} style={[styles.summitButton, {
-                height: 1 / 10 * deviceHeight,
-                width: 1 / 3 * deviceWidth,
-                right: 1 / 20 * deviceWidth,
-                bottom: 1.5 / 20 * deviceHeight,
-                borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-              }]} >
-                <Text style={[styles.summitButtonText, {
-                  fontSize: 1 / 15 * deviceHeight,
-                  paddingVertical: 1 / 60 * deviceHeight
-                }]} >
-                  ยืนยัน
-                </Text>
-              </TouchableOpacity> */}
-
-              {/* <View style={{ flex: 4, backgroundColor: 'transparent' }} />
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: deviceWidth, backgroundColor: 'rgba(255,255,255,0.3)' }} >
-                <Text>{this.state.lastScannedCode}</Text>
-                <Text>{this.state.students}</Text>
-                <TouchableOpacity onPress={() => { this._handlePressSummit() }} >
-                  <Text style={[styles.summitButtonText, {
-                    height: 1 / 10 * deviceHeight,
-                    width: 3 / 4 * deviceWidth,
-                    fontSize: 1 / 20 * deviceHeight,
-                    borderRadius: 1 / 3 * 1 / 10 * deviceHeight,
-                  }]} >
-                    เสร็จสิ้น {this.studentsText}
-                </Text>
-                </TouchableOpacity>
-              </View> */}
             </BarCodeScanner>
 
         }
@@ -789,7 +537,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0070C0'
   },
   summitButtonText: {
-    //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFFFFF',
@@ -801,25 +548,10 @@ const styles = StyleSheet.create({
   backgroundCenter: {
     flex: 5,
     flexDirection: 'row',
-    //backgroundColor:  'transparent', 
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#fff',
-  },
-  backgroundCenterLeft: {
-    flex: 1,
-    backgroundColor: 'blue',
-  },
-  backgroundScanBox: {
-    flex: 8,
-    //backgroundColor: 'transparent', 
-    //borderWidth: 1,
-    //borderColor: '#fff',
-  },
-  backgroundCenterRight: {
-    flex: 1,
-    backgroundColor: backgroundScanerColor,
   },
   backgroundBot: {
     flex: 9,

@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-
+import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class CustomDrawerItem extends React.Component {
@@ -12,9 +11,7 @@ export default class CustomDrawerItem extends React.Component {
             }]} >
                 <TouchableOpacity onPress={() => { changeActivateStatus(); navigate(page) }} style={[styles.button, {
                     height: 1 / 15 * deviceHeight,
-                    width: drawerWidth,
-                    // right: 1 / 20 * deviceWidth,
-                    // bottom: 1.5 / 20 * deviceHeight,
+                    width: drawerWidth
                 }]} >
                     <Image
                         source={photo}
@@ -27,7 +24,7 @@ export default class CustomDrawerItem extends React.Component {
                     <Text style={[styles.buttonText, {
                         marginLeft: 1 / 15 * 0.3 * deviceHeight,
                         fontSize: 1 / 25 * deviceHeight,
-                        padding: 1 / 70 * deviceHeight, 
+                        padding: 1 / 70 * deviceHeight,
                         color: status ? 'red' : 'black'
                     }]}  >
                         {label}

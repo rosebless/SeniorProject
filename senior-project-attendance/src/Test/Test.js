@@ -1,4 +1,3 @@
-
 const project_attendance = {                // 18
   Professor: {                              // 9 
     firebase_key: {                         // 20 

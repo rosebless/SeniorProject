@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-
-import { StyleSheet, Text, View, Image, FlatList, ActivityIndicator } from 'react-native';
-// import AppVarible from '../../../Model/AppVarible'
+import { StyleSheet, Text, View, Image, Alert, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import firebase from '../../config/firebase'
 import DrawerHeader from '../DrawerGroup/DrawerHeader'
 import ButtonSet from './ButtonSet'
@@ -13,6 +11,7 @@ export default class Manager extends React.Component {
     timeLate: '',
     timeOut: '',
     currentProfessorKey: '',
+    currentWeekDay: '',
     uploading: false
   }
   componentWillMount = () => {
@@ -20,9 +19,9 @@ export default class Manager extends React.Component {
       this.getProfessorsFormFirebase()
     })
   }
-  componentWillUnmount = () => [
+  componentWillUnmount = () => {
     firebase.database().ref('/Subject').child(this.props.screenProps.focus.id).child('professors').off()
-  ]
+  }
   getProfessorsFormFirebase = () => {
     const { focus: { id }, userLogOn: { professorID } } = this.props.screenProps
     firebase.database().ref('/Subject').child(id).child('professors').on('value', snapshot => {
@@ -32,22 +31,20 @@ export default class Manager extends React.Component {
         name: objProfessor[key].name,
         professorID: objProfessor[key].professorID,
         photoUrl: objProfessor[key].photoUrl,
-        timeIn: objProfessor[key].timeIn || 'เลือกเวลา',
-        timeLate: objProfessor[key].timeLate || 'เลือกเวลา',
-        timeOut: objProfessor[key].timeOut || 'เลือกเวลา'
+        key
+        // timeIn: objProfessor[key].timeIn || 'เลือกเวลา',
+        // timeLate: objProfessor[key].timeLate || 'เลือกเวลา',
+        // timeOut: objProfessor[key].timeOut || 'เลือกเวลา',
+        // weekDay: objProfessor[key].weekDay || 'เลือกวัน'
       }))
-
       // get time  
-      console.log(objProfessor)
-      console.log(professorID)
-      const currentProfessorKey = Object.keys(objProfessor).find(key => objProfessor[key].professorID == professorID)
+      const currentProfessorKey = Object.keys(objProfessor).find(key => objProfessor[key].professorID === professorID)
       const timeIn = objProfessor[currentProfessorKey].timeIn || 'เลือกเวลา'
       const timeLate = objProfessor[currentProfessorKey].timeLate || 'เลือกเวลา'
       const timeOut = objProfessor[currentProfessorKey].timeOut || 'เลือกเวลา'
-
-      // set state 
-      this.setState({ professors, currentProfessorKey, timeIn, timeLate, timeOut, uploading: false })
-
+      const weekDay = objProfessor[currentProfessorKey].weekDay ? this.weekDays.findIndex(obj => obj.value === objProfessor[currentProfessorKey].weekDay) : 'เลือกวัน'
+      // set state  
+      this.setState({ professors, currentProfessorKey, timeIn, timeLate, timeOut, currentWeekDay: weekDay, uploading: false })
       // update
       this.updateProfessorsName(professors)
     })
@@ -65,27 +62,87 @@ export default class Manager extends React.Component {
       const professorMustUpdate = currentProfessor.filter(professor => professors.some(professorHere =>
         professor.professorID == professorHere.professorID && professor.name !== professorHere.name))
       console.log('professorMustUpdate', professorMustUpdate)
-      const professorUpdate = professors.map(professor => {
-        const professorUp = professorMustUpdate.find(p => p.professorID == professor.professorID)
-        return {
-          ...professor,
-          name: professorUp ? professorUp.name : professor.name,
-          // timeIn,
-          // timeLate,
-          // timeOut
-        }
+      let professorUpdate = {}
+      professorMustUpdate.forEach(professor => {
+        const id = [professor.key, 'name'].join('/')
+        professorUpdate[id] = professor.name
       })
-      console.log('professorUpdate', professorUpdate)
-      this.setState({ professors: professorUpdate })
-      firebase.database().ref('/Subject').child(id).child('professors').set(professorUpdate)
+      firebase.database().ref('/Subject').child(id).child('professors').update(professorUpdate)
     })
   }
-  updateTimeOnFirebase = (timeType, timeSet) => { // timeType = 'timeIn', 'timeLate', 'timeOut'
+  updateTimeOnFirebase = (timeType, timeSet, finalMethod) => { // timeType = 'timeIn', 'timeLate', 'timeOut' 
+    const { id } = this.props.screenProps.focus
+    const { currentProfessorKey, timeIn, timeLate, timeOut } = this.state
+    const [hour, minute] = timeSet.split(':')
+    const [hourIn, minuteIn] = timeIn.split(':')
+    const [hourLate, minuteLate] = timeLate.split(':')
+    const [hourOut, minuteOut] = timeOut.split(':')
+    if (
+      (timeType === 'timeLate' && (parseInt(hour, 10) < parseInt(hourIn, 10) || (hour === hourIn && parseInt(minute, 10) <= parseInt(minuteIn, 10)))) ||
+      (timeType === 'timeOut' && (parseInt(hour, 10) < parseInt(hourLate, 10) || (hour === hourLate && parseInt(minute, 10) <= parseInt(minuteLate, 10))))
+    ) {
+      Alert.alert(
+        'เวลาไม่ถูกต้อง',
+        timeType === 'timeLate'
+          ? 'เวลาเข้าสายต้องมากกว่าเวลาเข้าเรียน'
+          : 'เวลาขาดเรียนต้องมากกว่าเวลาเข้าสาย',
+        [
+          {
+            text: 'ตกลง', onPress: () => { }
+          },
+        ],
+        { cancellable: false }
+      )
+    } else if (
+      (timeType === 'timeIn' && (parseInt(hour, 10) > parseInt(hourLate, 10) || (hour === hourLate && parseInt(minute, 10) >= parseInt(minuteLate, 10)))) ||
+      (timeType === 'timeLate' && (parseInt(hour, 10) > parseInt(hourOut, 10) || (hour === hourOut && parseInt(minute, 10) >= parseInt(minuteOut, 10))))
+    ) {
+      Alert.alert(
+        'เวลาไม่ถูกต้อง',
+        timeType === 'timeIn'
+          ? 'เวลาเข้าเรียนต้องน้อยกว่าเวลาเข้าสาย \n ต้องการรีเซตเวลาเข้าสายหรือไม่ '
+          : 'เวลาเข้าสายต้องน้อยกว่าเวลาขาดเรียน \n ต้องการรีเซตเวลาเข้าสายหรือไม่ ',
+        [
+          {
+            text: 'รีเซต', onPress: () => {
+              firebase.database().ref(`/Subject/${id}/professors/${currentProfessorKey}/${timeType}`).set(timeSet)
+              firebase.database().ref(`/Subject/${id}/professors/${currentProfessorKey}`).child(
+                timeType === 'timeIn'
+                  ? 'timeLate'
+                  : 'timeOut'
+              ).remove()
+              finalMethod()
+            }
+          },
+          {
+            text: 'ยกเลิก', onPress: () => { }
+          }
+        ],
+        { cancellable: false }
+      )
+    } else {
+      console.log('currentProfessorKey', currentProfessorKey)
+      firebase.database().ref(`/Subject/${id}/professors/${currentProfessorKey}/${timeType}`).set(timeSet)
+      finalMethod()
+    }
+  }
+  updateWeekDayOnFirebase = (index) => {
     const { id } = this.props.screenProps.focus
     const { currentProfessorKey } = this.state
-    console.log('currentProfessorKey', currentProfessorKey)
-    firebase.database().ref(`/Subject/${id}/professors/${currentProfessorKey}/${timeType}`).set(timeSet)
+    const weekday = this.weekDays[index].value
+    firebase.database().ref(`/Subject/${id}/professors/${currentProfessorKey}/weekDay`).set(weekday).then(() => {
+      this.setState({ currentWeekDay: index })
+    })
   }
+  weekDays = [
+    { id: 'อา.', value: 'วันอาทิตย์' },
+    { id: 'จ.', value: 'วันจันทร์' },
+    { id: 'อ.', value: 'วันอังคาร' },
+    { id: 'พ.', value: 'วันพุธ' },
+    { id: 'พฤ.', value: 'วันพฤหัสบดี' },
+    { id: 'ศ.', value: 'วันศุกร์' },
+    { id: 'ส.', value: 'วันเสาร์' }
+  ]
   _maybeRenderUploadingOverlay = () => {
     if (this.state.uploading) {
       return (
@@ -106,7 +163,7 @@ export default class Manager extends React.Component {
   render() {
     const { openDrawer, navigate } = this.props.navigation
     const { deviceSize, deviceSize: { deviceHeight, deviceWidth }, userLogOn: { professorID }, focus } = this.props.screenProps
-    const { professors, timeIn, timeLate, timeOut } = this.state
+    const { professors, timeIn, timeLate, timeOut, currentWeekDay } = this.state
     return (
       <View style={styles.container} >
         <DrawerHeader openDrawer={openDrawer} goBack={() => navigate('Selector')} deviceHeight={deviceHeight} />
@@ -117,7 +174,6 @@ export default class Manager extends React.Component {
               width: 3 / 20 * deviceHeight,
               marginLeft: 0.05 * deviceWidth
             }} />
-          {/* <Text style={{ fontSize: 1.5 / 40 * deviceHeight }} > อาจารย์ </Text>  */}
           <View style={{
             flex: 1,
             flexDirection: 'column',
@@ -144,7 +200,7 @@ export default class Manager extends React.Component {
                   fontSize: 1 / 25 * deviceHeight
                 }]}>
                   ( Sec {focus.section} )
-                             </Text>
+                </Text>
               )
             }
           </View>
@@ -155,7 +211,8 @@ export default class Manager extends React.Component {
             data={professors}
             renderItem={({ item: professor }) => (
               <View style={{
-                margin: 1 / 10 * 0.1 * deviceHeight,
+                marginHorizontal: 1 / 10 * 0.1 * deviceHeight,
+                marginVertical: 1 / 10 * 0.05 * deviceHeight
               }}>
                 <View style={{
                   flex: 1,
@@ -184,21 +241,39 @@ export default class Manager extends React.Component {
                     }]}>
                       {professor.name}
                     </Text>
-
                   </View>
                 </View>
-
               </View>
-
             )}
-            keyExtractor={professor => professor.professorID}
+            keyExtractor={professor => professor.key}
           //numColumns={numColumns} 
           />
         </View>
         <View style={styles.bot} >
-          <ButtonSet deviceSize={deviceSize} btext={timeIn} text={'เข้าเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeIn', timeSet)} />
-          <ButtonSet deviceSize={deviceSize} btext={timeLate} text={'เข้าสาย'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeLate', timeSet)} />
-          <ButtonSet deviceSize={deviceSize} btext={timeOut} text={'ขาดเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet) => this.updateTimeOnFirebase('timeOut', timeSet)} />
+          <View style={[styles.weekday, { width: 0.9 * deviceWidth }]} >
+            {this.weekDays.map((w, index) => (
+              <TouchableOpacity key={index} onPress={() => this.updateWeekDayOnFirebase(index)}
+                style={[styles.weekdayball, {
+                  height: 1 / 15 * 0.8 * deviceHeight,
+                  width: 1 / 15 * 0.8 * deviceHeight,
+                  borderRadius: 1 / 2 * 1 / 15 * 0.8 * deviceHeight,
+                  backgroundColor: currentWeekDay === index ? '#00CED1' : '#EDEDED'
+                }]} >
+                <Text
+                  style={{
+                    fontSize: 1 / 30 * deviceHeight,
+                    paddingVertical: 1 / 60 * deviceHeight,
+                    color: currentWeekDay === index ? '#fff' : '#000'
+                  }}
+                >
+                  {this.weekDays[index].id}
+                </Text>
+              </TouchableOpacity >
+            ))}
+          </View>
+          <ButtonSet deviceSize={deviceSize} btext={timeIn} text={'เข้าเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet, finalMethod) => this.updateTimeOnFirebase('timeIn', timeSet, finalMethod)} />
+          <ButtonSet deviceSize={deviceSize} btext={timeLate} text={'เข้าสาย'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet, finalMethod) => this.updateTimeOnFirebase('timeLate', timeSet, finalMethod)} />
+          <ButtonSet deviceSize={deviceSize} btext={timeOut} text={'ขาดเรียน'} navigate={this.props.navigation.navigate} updateTimeOnFirebase={(timeSet, finalMethod) => this.updateTimeOnFirebase('timeOut', timeSet, finalMethod)} />
         </View>
         {this._maybeRenderUploadingOverlay()}
       </View>
@@ -221,13 +296,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   list: {
-    flex: 7,
+    flex: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bot: {
-    flex: 7,
+    flex: 8,
     justifyContent: 'space-around',
+    alignItems: 'center'
+  },
+  weekday: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  },
+  weekdayball: {
+    justifyContent: 'center',
     alignItems: 'center'
   },
   buttonAndText: {
@@ -241,7 +325,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0070C0'
   },
   buttonText: {
-    //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFFFFF',
@@ -251,5 +334,3 @@ const styles = StyleSheet.create({
     height: 24,
   },
 });
-
-

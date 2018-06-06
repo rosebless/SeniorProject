@@ -1,81 +1,32 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, DeviceEventEmitter, Dimensions } from 'react-native';
-import { DrawerNavigator, NavigationActions } from 'react-navigation';
-//port { Icon } from 'native-base'
-import { Icon, Button, Container, Header, Content, Left } from 'native-base';
+import React from 'react';
+import { StyleSheet, Text, TextInput, View, Image, ScrollView, KeyboardAvoidingView, Dimensions } from 'react-native';
 import Keyboard from 'react-native-keyboard';
 import CustomButton from '../CustomButton'
 
-// var KeyboardEvents = require('react-native-keyboardevents');
-// var KeyboardEventEmitter = KeyboardEvents.Emitter;
-
 export default class ManualAttendance extends React.Component {
-
     state = {
         student: '000000',
         textOutput: 'รอกรอกข้อมูล',
-        textOutputColor: 'black',
-        // visibleHeight: Dimensions.get('window').height,
-        // keyboardSpace: 0
+        textOutputColor: 'black'
     }
-
-    // updateKeyboardSpace(frames) {
-    //     this.setState({keyboardSpace: frames.end.height});
-    //   }
-
-    //   resetKeyboardSpace() {
-    //     this.setState({keyboardSpace: 0});
-    //   }
-
-    //   componentDidMount() {
-    //     KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    //     KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-    //   }
-
-    //   componentWillUnmount() {
-    //     KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-    //     KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-    //   }
-
-    // componentDidMount() {
-    //     model.onChange((model) => {
-    //         this.setState({student: model.getKeys().join('')});
-    //     });
-    // }
-
-    // _handleClear() {
-    //     model.clearAll();
-    // }
-
-    // _handleDelete() {
-    //     model.delKey();
-    // }
-
-    // _handleKeyPress(key) {
-    //     model.addKey(key);
-    // }
-
     checkSuccess = (text) => {
         this.setState({
             textOutput: text,
             textOutputColor: '#3eee26'
         })
     }
-
     checkWarning = (text) => {
         this.setState({
             textOutput: text,
             textOutputColor: '#ffc000'
         })
     }
-
     checkFail = (text) => {
         this.setState({
             textOutput: text,
             textOutputColor: '#ff0000'
         })
     }
-
     finishingOutput = () => {
         setTimeout(() => {
             this.setState({
@@ -84,9 +35,7 @@ export default class ManualAttendance extends React.Component {
             })
         }, 3000)
     }
-
     render() {
-        console.log('Manual Props.navigation', this.props.navigation)
         const { deviceSize: { deviceHeight, deviceWidth }, focus } = this.props.screenProps
         const { attendance } = this.props.navigation.state.params
         const { student, textOutput, textOutputColor } = this.state
@@ -188,51 +137,11 @@ export default class ManualAttendance extends React.Component {
                             style={{
                                 height: 1 / 10 * deviceHeight,
                                 width: 4 / 10 * deviceWidth,
-                                marginLeft: 2 / 10 / 3 * deviceWidth,
-                                // bottom: 1.5 / 20 * deviceHeight,
-                                // position: 'absolute'
+                                marginLeft: 2 / 10 / 3 * deviceWidth
                             }}
                             text={'ยืนยัน'}
                         />
                     </View>
-                    {/* </KeyboardAvoidingView> */}
-                    {/* <TouchableOpacity onPress={() => { attendance(student, this.checkSuccess, this.checkWarning, this.checkFail, this.finishingOutput) }} style={[styles.botButton, {
-                    height: 1 / 10 * deviceHeight,
-                    width: 4 / 10 * deviceWidth,
-                    left: 2 / 10 / 3 * deviceWidth,
-                    bottom: 1.5 / 20 * deviceHeight,
-                    borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-                }]} >
-                    <Text style={[styles.botButtonText, {
-                        fontSize: 1 / 15 * deviceHeight,
-                        paddingVertical: 1 / 60 * deviceHeight
-                    }]} >
-                        ย้อนกลับ
-                </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => { attendance(student, this.checkSuccess, this.checkWarning, this.checkFail, this.finishingOutput) }} style={[styles.botButton, {
-                    height: 1 / 10 * deviceHeight,
-                    width: 4 / 10 * deviceWidth,
-                    right: 2 / 10 / 3 * deviceWidth,
-                    bottom: 1.5 / 20 * deviceHeight,
-                    borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-                }]} >
-                    <Text style={[styles.botButtonText, {
-                        fontSize: 1 / 15 * deviceHeight,
-                        paddingVertical: 1 / 60 * deviceHeight
-                    }]} >
-                        ยืนยัน
-                </Text>
-                </TouchableOpacity> */}
-
-                    {/* <Keyboard
-                    keyboardType="decimal-pad"
-                    // onClear={this._handleClear.bind(this)}
-                    // onDelete={this._handleDelete.bind(this)}
-                    // onKeyPress={this._handleKeyPress.bind(this)}
-                /> */}
-
                 </ScrollView>
             </KeyboardAvoidingView>
         );
@@ -243,8 +152,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        // justifyContent: 'center',
-        // position: 'relative',
         marginTop: 25
     },
     top: {
@@ -258,7 +165,6 @@ const styles = StyleSheet.create({
     },
     bot: {
         flexDirection: 'row',
-        // justifyContent: 'space-around',
         alignItems: 'center'
     },
     botButton: {
@@ -267,7 +173,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#0070C0'
     },
     botButtonText: {
-        //flex: 1,
         textAlignVertical: 'center',
         textAlign: 'center',
         color: '#FFFFFF',

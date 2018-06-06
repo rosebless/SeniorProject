@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-
+import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default class ButtonSet extends React.Component {
@@ -12,8 +11,6 @@ export default class ButtonSet extends React.Component {
         <View style={{
           height: 1 / 15 * deviceHeight,
           justifyContent: 'center'
-          // right: 1 / 20 * deviceWidth,
-          // bottom: 1.5 / 20 * deviceHeight
         }} >
           <Text style={{
             fontSize: 1 / 20 * deviceHeight,
@@ -25,8 +22,6 @@ export default class ButtonSet extends React.Component {
         <TouchableOpacity onPress={() => { navigate('TimePicker', { timeText: text, btext, updateTimeOnFirebase }) }} style={[styles.button, {
           height: 1 / 15 * deviceHeight,
           width: 0.5 * deviceWidth,
-          // right: 1 / 20 * deviceWidth,
-          // bottom: 1.5 / 20 * deviceHeight,
           borderRadius: 1 / 3 * 1 / 15 * deviceHeight
         }]} >
           <Image
@@ -58,16 +53,12 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: 'row',
-    // justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#0070C0' #EDEDED
     backgroundColor: '#EDEDED'
   },
   buttonText: {
-    //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
-    // color: '#FFFFFF', 
   },
   icon: {
     width: 24,

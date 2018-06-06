@@ -1,13 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, Image, Button, Alert, ScrollView, ActivityIndicator } from 'react-native';
-//port { Icon } from 'native-base'
-// import AppVarible from '../../../Model/AppVarible' 
 import { Table, TableWrapper, Row, Cell, Col } from 'react-native-table-component'
 import firebase from '../../config/firebase'
 import DrawerHeader from '../DrawerGroup/DrawerHeader'
 
 export default class Dashboard extends React.Component {
-
   state = {
     header: [],
     widthArr: [],
@@ -27,7 +24,6 @@ export default class Dashboard extends React.Component {
 
   getStudentsFormFirebase = () => {
     const { id } = this.props.screenProps.focus
-    // console.log()
     firebase.database().ref('/Subject').child(id).on('value', snapshot => {
       const objStudents = snapshot.val()
       const students = Object.keys(objStudents.students)
@@ -43,9 +39,8 @@ export default class Dashboard extends React.Component {
     const widthArr = [0.2 * deviceHeight]
     const attendanceLen = Object.keys(attendance).length
     const numOfWeeks = attendanceLen < 4 ? 3 : attendanceLen
-    // console.log(numOfWeeks)
     for (let i = 1; i <= numOfWeeks; i++) {
-      header.push(`week ${i}`)
+      header.push(`คาบที่ ${i}`)
       widthArr.push(0.1 * deviceHeight)
     }
     const attendanceTable = {}
@@ -62,26 +57,6 @@ export default class Dashboard extends React.Component {
     header.push('หมายเหตุ')
     widthArr.push(0.2 * deviceHeight)
     this.setState({ uploading: false, header, widthArr, attendanceTable })
-
-    // firebase.database().ref('/Attendance').on('value', snapshot => {
-    //   const objAttendance = snapshot.val()
-    //   const attendance = Object.keys(objAttendance).filter(key => objAttendance[key].subject == id).map(key => ({
-    //     date: objAttendance[key].date,
-    //     students: objAttendance[key].students,
-    //   }))
-    //   const header = []
-    //   const dataTable = []
-    //   attendance.forEach(one => {
-    //     header.push(one.date)
-    //     const dataCol = []
-    //     students.forEach((student, index) => {
-    //       const s = Object.keys(one.students).filter(s => student == s)[0]
-    //       if (s) dataCol.push(renderCell(s))
-    //       else dataCol.push(renderCell('absent'))
-    //     })
-    //     dataTable.push(dataCol)
-    //   })
-    // })
   }
 
   EditButton = (student, attendance) => (
@@ -178,10 +153,9 @@ export default class Dashboard extends React.Component {
     const { header, widthArr, attendanceTable } = this.state
     const widthHeader = widthArr[0]
     const widthArrBody = widthArr.filter((a, index) => index != 0)
-    // console.log(header, attendanceTable)
     return (
       <View style={styles.container} >
-        <DrawerHeader openDrawer={openDrawer} goBack={() => navigate('Dashboard_Selection')} deviceHeight={deviceHeight} />
+        <DrawerHeader openDrawer={openDrawer} goBack={() => navigate('Selector')} deviceHeight={deviceHeight} />
         <View style={styles.top}>
           <Image source={require('../../pics/dashboardPage.png')} style={{ position: 'absolute', width: 3 / 20 * deviceHeight, height: 3 / 20 * deviceHeight, left: 0.05 * deviceWidth }} />
           <Text style={{ fontSize: 1 / 15 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} > สรุปผล </Text>
@@ -193,9 +167,9 @@ export default class Dashboard extends React.Component {
         <View style={styles.bot}>
           <Table borderStyle={{ borderColor: '#0070C0' }} >
             <TableWrapper style={{ borderColor: '#0070C0', flexDirection: 'row' }} >
-              <Cell data={'รหัสนักศึกษา'} style={[styles.headerTable, { left: 0, height: 50, width: widthHeader }]} textStyle={styles.text} />
+              <Cell data={'รหัสนักศึกษา'} style={[styles.headerTable, { left: 0, height: 50, width: widthHeader }]} textStyle={[styles.text, { fontSize: 1 / 40 * deviceHeight, paddingVertical: 1 / 80 * deviceHeight }]} />
               <ScrollView horizontal={true} ref={scrollView => { this.headerScrollView = scrollView }} style={{ left: 0, width: deviceWidth - widthHeader }} >
-                <Row data={header} widthArr={widthArrBody} style={[styles.headerTable, { height: 50, backgroundColor: '#ffb191' }]} textStyle={styles.text} borderStyle={{ borderColor: '#0070C0' }} />
+                <Row data={header} widthArr={widthArrBody} style={[styles.headerTable, { height: 50, backgroundColor: '#ffb191' }]} textStyle={[styles.text, { fontSize: 1 / 40 * deviceHeight, paddingVertical: 1 / 80 * deviceHeight }]} borderStyle={{ borderColor: '#0070C0' }} />
               </ScrollView>
             </TableWrapper >
             <ScrollView  >
@@ -219,7 +193,6 @@ export default class Dashboard extends React.Component {
                     {
                       attendanceTable &&
                       Object.keys(attendanceTable).map((key, index) => {
-                        // console.log(attendanceTable[key])
                         return <Row data={attendanceTable[key]} key={key} widthArr={widthArrBody} style={[styles.bodyTable, { height: 40, backgroundColor: index % 2 ? '#fffacd' : '#FFFBDD' }]} textStyle={styles.text} borderStyle={{ borderColor: '#0070C0' }} />
                       })
                     }
@@ -227,33 +200,6 @@ export default class Dashboard extends React.Component {
                 </ScrollView>
               </TableWrapper >
             </ScrollView>
-
-            {/*       <ScrollView horizontal={true}>
-              <View>
-
-                <Row data={header}
-                  widthArr={widthArr}
-                  style={styles.header} textStyle={styles.text}
-                />
-
-                <ScrollView overScrollMode={'never'} style={styles.dataWrapper}>
-                  <Table borderStyle={{ borderColor: '#0070C0' }}>
-                    {
-                      attendanceTable &&
-                      attendanceTable.map((rowData, index) => (
-                        <Row
-                          key={index}
-                          data={rowData}
-                          widthArr={widthArr}
-                          style={[styles.row, index % 2 && { backgroundColor: '#F7F6E7' }]}
-                          textStyle={styles.text}
-                        />
-                      ))
-                    }
-                  </Table>
-                </ScrollView>
-              </View>
-            </ScrollView> */}
           </Table>
         </View>
         {this._maybeRenderUploadingOverlay()}
@@ -295,19 +241,12 @@ const styles = StyleSheet.create({
   },
   headerTable: {
     backgroundColor: '#ffb191',
-    borderColor: '#0070C0',
-    // textAlign: 'center'
-    // justifyContent: 'center',
-    // alignItems: 'center'
+    borderColor: '#0070C0'
   },
   bodyTable: {
-    borderColor: '#0070C0',
-    // textAlign: 'center'
-    // justifyContent: 'center',
-    // alignItems: 'center'
+    borderColor: '#0070C0'
   },
-  header: { height: 50, backgroundColor: '#537791' },
-  text: { textAlign: 'center' },
-  dataWrapper: { marginTop: -1 },
-  row: { height: 40, backgroundColor: '#E7E6E1' }
+  text: {
+    textAlign: 'center'
+  }
 });

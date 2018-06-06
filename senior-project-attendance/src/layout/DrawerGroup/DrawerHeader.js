@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Text, View, Image, TouchableHighlight, TouchableOpacity, Alert
-} from 'react-native';
-import { } from 'react-navigation'
-// import AppVarible from '../../../Model/AppVarible';
+import { Text, View, Image, TouchableOpacity, Alert } from 'react-native';
 
 export default class DrawerHeader extends Component {
     render() {
@@ -46,16 +42,13 @@ export default class DrawerHeader extends Component {
             flexDirection: 'row',
             justifyContent: goBack ? 'space-between' : 'flex-start',
             alignItems: 'center',
-            backgroundColor: '#00CED1',
+            backgroundColor: '#00CED1'
         }}>
             <TouchableOpacity style={{ marginHorizontal: 1 / 10 * 0.2 * deviceHeight }}
                 onPress={() => {
                     // @FIX step 4
                     // call fnNavigate function
-                    openDrawer()   //fnNavigate('DrawerOpen');
-                    // navigate('DrawerOpen');
-                    // alert(5555);
-                    // alert(JSON.stringify(this.props.navigation))
+                    openDrawer()   //fnNavigate('DrawerOpen');  
                 }}>
                 <Image
                     style={{ width: 1 / 10 * 0.6 * deviceHeight, height: 1 / 10 * 0.6 * deviceHeight }}
@@ -65,14 +58,7 @@ export default class DrawerHeader extends Component {
             {
                 goBack &&
                 <TouchableOpacity style={{ marginHorizontal: 1 / 10 * 0.2 * deviceHeight }}
-                    onPress={() => {
-                        // @FIX step 4
-                        // call fnNavigate function
-                        goBack() //fnNavigate('DrawerOpen');
-                        // navigate('DrawerOpen');
-                        // alert(5555);
-                        // alert(JSON.stringify(this.props.navigation))
-                    }}>
+                    onPress={() => { goBack() }}>
                     <Image
                         style={{ width: 1 / 10 * 0.6 * deviceHeight, height: 1 / 10 * 0.6 * deviceHeight }}
                         source={require('../../pics/backButton.png')}

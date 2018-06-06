@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
-import { Text, View, StyleSheet, Picker, Image, TouchableOpacity, Dimensions } from 'react-native';
+import React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Picker, Image } from 'react-native';
 import CustomButton from '../CustomButton'
 import { Constants } from 'expo';
 
 export default class TimePicker extends React.Component {
-
     constructor(props) {
         super(props)
         const hours = []
@@ -31,7 +30,6 @@ export default class TimePicker extends React.Component {
             selectedMinute: initMinute == '00' ? '3000' : ['30', initMinute].join('')
         }
     }
-
     minuteValueChange = (value) => {
         if (value == '0' || value == '5999') {
             this.setState({ selectedMinute: '3000' })
@@ -44,8 +42,10 @@ export default class TimePicker extends React.Component {
     summitButton = () => {
         const { updateTimeOnFirebase } = this.props.navigation.state.params
         const { minute, hour } = this.state
-        updateTimeOnFirebase([hour, minute].join(':'))
-        this.props.navigation.navigate('Manager')
+        // console.log('               ', updateTimeOnFirebase([hour, minute].join(':')))
+        updateTimeOnFirebase([hour, minute].join(':'), () => {
+            this.props.navigation.navigate('Manager')
+        })
     }
 
     render() {
@@ -111,11 +111,7 @@ export default class TimePicker extends React.Component {
                             นาที
                         </Text>
                     </View>
-
-
                 </View>
-
-
                 <View style={styles.bot} >
                     <CustomButton onPress={() => { this.summitButton() }}
                         style={{
@@ -124,21 +120,7 @@ export default class TimePicker extends React.Component {
                         }}
                         text={'ยืนยัน'}
                     />
-                    {/* <TouchableOpacity onPress={() => { this.summitButton() }} style={[styles.summitButton, {
-                        height: 1 / 10 * deviceHeight,
-                        width: 0.6 * deviceWidth,
-                        // bottom: 1 / 20 * deviceHeight,
-                        borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-                    }]} >
-                        <Text style={[styles.summitButtonText, {
-                            fontSize: 1 / 15 * deviceHeight,
-                            paddingVertical: 1 / 60 * deviceHeight
-                        }]} >
-                            ยืนยัน
-                            </Text>
-                    </TouchableOpacity> */}
                 </View>
-
             </View>
         );
     }
@@ -147,9 +129,7 @@ export default class TimePicker extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // flexDirection: 'column',
         backgroundColor: '#fff',
-        // justifyContent: 'center',
         marginTop: 25
     },
     top: {
@@ -178,11 +158,9 @@ const styles = StyleSheet.create({
     summitButton: {
         justifyContent: 'center',
         alignItems: 'center',
-        // position: 'absolute',
         backgroundColor: '#0070C0'
     },
     summitButtonText: {
-        //flex: 1,
         textAlignVertical: 'center',
         textAlign: 'center',
         color: '#FFFFFF'

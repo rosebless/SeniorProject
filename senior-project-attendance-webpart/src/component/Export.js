@@ -51,16 +51,12 @@ export default class Import extends React.Component {
         this.generate()
     }
 
-    generate = () => {
-        const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
-        firebase.database().ref('/Professor').child(professorKey).child('subjects').on('value', snapshot => {
-            const objSubject = snapshot.val()
-            const files = this.customQuery(objSubject).map((key) => ({ id: key, name: objSubject[key].name, checked: false }))
-            this.setState({ files })
-        })
+    componentWillUnmount = () => {
+        firebase.database().ref('Subject').off()
     }
 
-    customQuery = (objSubject) => {
+    generate = () => {
+        const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
         const startTerm1 = { month: 7, day: 1 }
         const startTerm2 = { month: 1, day: 1 }
         let year, term
@@ -76,9 +72,40 @@ export default class Import extends React.Component {
             term = 1
         }
         const currentTerm = [year, term].join('-')
-        console.log('currentTerm', currentTerm)
-        return Object.keys(objSubject).filter(subject => subject.substr(0, 6) === currentTerm)
+        const ref = firebase.database().ref('Subject')
+        if (ref) {
+            ref.orderByKey().startAt([currentTerm, '-'].join('')).endAt([currentTerm, '~'].join('')).on('value', snapshot => {
+                const objSubject = snapshot.val()
+                const files = Object.keys(objSubject).map((key) => ({ id: key, name: objSubject[key].name, checked: false }))
+                this.setState({ files })
+            })
+        }
+        // firebase.database().ref('/Professor').child(professorKey).child('subjects').on('value', snapshot => {
+        //     const objSubject = snapshot.val()
+        //     const files = this.customQuery(objSubject).map((key) => ({ id: key, name: objSubject[key].name, checked: false }))
+        //     this.setState({ files })
+        // })
     }
+
+    // customQuery = (objSubject) => {
+    //     const startTerm1 = { month: 7, day: 1 }
+    //     const startTerm2 = { month: 1, day: 1 }
+    //     let year, term
+    //     const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+    //     const currentYear = parseInt(currentDate.split('/')[2])
+    //     const currentMonth = parseInt(currentDate.split('/')[1])
+    //     const currentDay = parseInt(currentDate.split('/')[0])
+    //     if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+    //         year = currentYear - 1
+    //         term = 2
+    //     } else {
+    //         year = currentYear
+    //         term = 1
+    //     }
+    //     const currentTerm = [year, term].join('-')
+    //     console.log('currentTerm', currentTerm)
+    //     return Object.keys(objSubject).filter(subject => subject.substr(0, 6) === currentTerm)
+    // }
 
     onChecked = (index) => {
         const { files } = this.state
@@ -93,7 +120,23 @@ export default class Import extends React.Component {
         const { files } = this.state
         const { utils: { book_new, aoa_to_sheet, book_append_sheet }, writeFile } = XLSX
         const workBook = book_new()
-        firebase.database().ref('/Subject').once('value', snapshot => {
+        const fileSort = files.sort()
+        const startTerm1 = { month: 7, day: 1 }
+        const startTerm2 = { month: 1, day: 1 }
+        let year, term
+        const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+        const currentYear = parseInt(currentDate.split('/')[2])
+        const currentMonth = parseInt(currentDate.split('/')[1])
+        const currentDay = parseInt(currentDate.split('/')[0])
+        if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+            year = currentYear - 1
+            term = 2
+        } else {
+            year = currentYear
+            term = 1
+        }
+        const currentTerm = [year, term].join('-')
+        firebase.database().ref('/Subject').orderByKey().startAt([currentTerm, '-'].join('')).endAt([currentTerm, '~'].join('')).once('value', snapshot => {
             const allSubject = snapshot.val()
             files.filter(file => file.checked).forEach(file => {
                 const attendance = allSubject[file.id].attendance || {}
@@ -127,7 +170,7 @@ export default class Import extends React.Component {
                     aoaForSheet = aoaForSheet.map((arr, i) => {
                         const studentKey = Object.keys(students || {}).find(key => key === arr[1])
                         if (weekIndex === 1) {
-                            comment[i] = ''
+                            comment[i] = ' '
                         }
                         if (studentKey) {
                             arr.push(this.readStatus(students[studentKey].status) || '')
@@ -162,7 +205,7 @@ export default class Import extends React.Component {
                         && arr.push(comment[i])
                         && arr.push(arr.filter(a => a === '✔').length)
                         && arr.push(arr.filter(a => a === '✱').length)
-                        && arr.push(arr.filter(a => a === '✖').length)
+                        && arr.push(arr.filter(a => a === '✖' || a === '').length)
                     return arr
                 })
                 // aoaForSheet = aoaForSheet.map((arr, i) => i < 3 ? (arr) : (arr.push(arr.filter(a => a === '✔').length)))

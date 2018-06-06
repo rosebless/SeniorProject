@@ -1,34 +1,13 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
-import { DrawerNavigator, NavigationActions } from 'react-navigation';
-//port { Icon } from 'native-base'
+import React from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import DrawerHeader from './DrawerGroup/DrawerHeader';
-import { Icon, Button, Container, Header, Content, Left } from 'native-base';
 import firebase from '../config/firebase'
 
 export default class selection extends React.Component {
-  /*
-static navigationOptions = ({ navigation }) => ({ 
-  title: 'เช็คชื่อ',
-  //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
-  //drawerLabel: 'Notification',
-  
-  drawerIcon: ({ tintColor }) => ( 
-    <Image 
-      source={require('../../pics/temp4.png')}
-      style={styles.icon}
-    />
-  ),
-})
-*/
-  constructor(props) {
-    super(props)
-    this.state = {
-      subjects: [],
-      uploading: false
-    }
+  state = {
+    subjects: [],
+    uploading: false
   }
-
   componentWillMount = () => {
     // firebase.database().goOffline()
     this.setState({ uploading: true }, () => {
@@ -38,18 +17,30 @@ static navigationOptions = ({ navigation }) => ({
 
   componentWillUnmount = () => {
     // firebase.database(false)
-    // firebase.database().ref('/Professor').child(professorKey).child('subjects').off()
+    firebase.database().ref('/Professor').child(this.props.screenProps.userLogOn.professorKey).child('subjects').off()
   }
 
   getUserSubjectsFormFirebase = () => {
     const { professorKey } = this.props.screenProps.userLogOn
     console.log(professorKey)
-    firebase.database().ref('/Professor').child(professorKey).child('subjects').once('value', snapshot => {
-      // console.log(snapshot.val())
-      // resolve(snapshot.val()); 
+    const startTerm1 = { month: 7, day: 1 }
+    const startTerm2 = { month: 1, day: 1 }
+    let year, term
+    const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+    const currentYear = parseInt(currentDate.split('/')[2])
+    const currentMonth = parseInt(currentDate.split('/')[1])
+    const currentDay = parseInt(currentDate.split('/')[0])
+    if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+      year = currentYear - 1
+      term = 2
+    } else {
+      year = currentYear
+      term = 1
+    }
+    const currentTerm = [year, term].join('-')
+    firebase.database().ref('/Professor').child(professorKey).child('subjects').orderByKey().startAt([currentTerm, '-'].join('')).endAt([currentTerm, '~'].join('')).on('value', snapshot => {
       const objSubject = snapshot.val() || {}
-      const subjects = this.customQuery(objSubject).map((key, index) => {
-        // console.log(index % 4, index)
+      const subjects = Object.keys(objSubject).map((key, index) => {
         let photoUrl
         switch (index % 3) {
           case 0:
@@ -62,7 +53,6 @@ static navigationOptions = ({ navigation }) => ({
             photoUrl = require('../pics/selection3.png')
             break
         }
-        // console.log(ImageProduct)
         return key.split('-')[3]
           ? {
             id: key,
@@ -83,26 +73,25 @@ static navigationOptions = ({ navigation }) => ({
       this.setState({ subjects, uploading: false })
     })
   }
-
-  customQuery = (objSubject) => {
-    const startTerm1 = { month: 7, day: 1 }
-    const startTerm2 = { month: 1, day: 1 }
-    let year, term
-    const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
-    const currentYear = parseInt(currentDate.split('/')[2])
-    const currentMonth = parseInt(currentDate.split('/')[1])
-    const currentDay = parseInt(currentDate.split('/')[0])
-    if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
-      year = currentYear - 1
-      term = 2
-    } else {
-      year = currentYear
-      term = 1
-    }
-    const currentTerm = [year, term].join('-')
-    console.log('currentTerm', currentTerm)
-    return Object.keys(objSubject).filter(subject => subject.substr(0, 6) == currentTerm)
-  }
+  // customQuery = (objSubject) => {
+  //   const startTerm1 = { month: 7, day: 1 }
+  //   const startTerm2 = { month: 1, day: 1 }
+  //   let year, term
+  //   const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+  //   const currentYear = parseInt(currentDate.split('/')[2])
+  //   const currentMonth = parseInt(currentDate.split('/')[1])
+  //   const currentDay = parseInt(currentDate.split('/')[0])
+  //   if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+  //     year = currentYear - 1
+  //     term = 2
+  //   } else {
+  //     year = currentYear
+  //     term = 1
+  //   }
+  //   const currentTerm = [year, term].join('-')
+  //   console.log('currentTerm', currentTerm)
+  //   return Object.keys(objSubject).filter(subject => subject.substr(0, 6) == currentTerm)
+  // }
   _maybeRenderUploadingOverlay = () => {
     if (this.state.uploading) {
       return (
@@ -140,7 +129,6 @@ static navigationOptions = ({ navigation }) => ({
               <View style={{
                 margin: 1 / 10 * 0.1 * deviceHeight,
               }}>
-                {/* {console.log('inloop',subject)} */}
                 <TouchableOpacity
                   onPress={() => {
                     selectFocus(subject)
@@ -202,19 +190,6 @@ static navigationOptions = ({ navigation }) => ({
   }
 }
 
-// const data = [
-//   { subjectCode: '05016013', subjectName: 'FUNCTION OF COMPLEX VARIABLES', section: '1', ImageProduct: require('../../pics/temp3.png') },
-//   { subjectCode: '05016062', subjectName: 'SPECIAL TOPICS IN APPLIED MATHEMATICS FOR BUSINESS', section: '1', ImageProduct: require('../../pics/temp1.png') },
-//   { subjectCode: '05016117', subjectName: 'TIME SERIES AND SURVIVAL MODEL ESTIMATION', section: '1', ImageProduct: require('../../pics/temp2.png') },
-//   { subjectCode: '05016146', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 1', section: '1', ImageProduct: require('../../pics/temp5.png') },
-//   { subjectCode: '05016147', subjectName: 'SPECIAL TOPICS IN INFORMATIC MATHEMATICS 2', section: '1', ImageProduct: require('../../pics/temp2.png') },
-//   { subjectCode: '05016008', subjectName: 'NUMERICAL ANALYSIS 1', section: '1', ImageProduct: require('../../pics/temp3.png') },
-//   { subjectCode: '05016007', subjectName: 'PARTIAL DIFFERENTIAL EQUATION', section: '1', ImageProduct: require('../../pics/temp4.png') },
-//   { subjectCode: '05016048', subjectName: 'FINANCIAL MATHEMATICS', section: '1', ImageProduct: require('../../pics/temp3.png') },
-//   { subjectCode: '05016114', subjectName: 'MATHEMATICAL MODELLING IN INDUSTRY', section: '1', ImageProduct: require('../../pics/temp2.png') }
-// ];
-//const numColumns = 2; 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -237,7 +212,6 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 16,
     color: '#000',
-    //fontWeight: '600',
     justifyContent: 'center',
     alignItems: 'center',
     flexWrap: 'wrap',
@@ -245,10 +219,8 @@ const styles = StyleSheet.create({
   itemDetail: {
     fontSize: 14,
     color: '#000',
-    //fontWeight: '600',
   },
   itemCode: {
-    //fontWeight: '600',
     fontSize: 12,
     color: '#000',
     marginBottom: 5,

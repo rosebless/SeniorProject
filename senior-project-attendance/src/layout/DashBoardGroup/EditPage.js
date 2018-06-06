@@ -1,24 +1,22 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert, Picker, Keyboard, KeyboardAvoidingView, ActivityIndicator, ScrollView } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, Image, TextInput, Alert, Keyboard, KeyboardAvoidingView, ActivityIndicator, ScrollView } from 'react-native';
 import firebase from '../../config/firebase'
 import CustomButton from '../CustomButton'
 import { Dropdown } from 'react-native-material-dropdown'
 
 export default class EditPage extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            week: [],
-            status: [],
-            time: [],
-            weekOrigin: [],
-            currentIndex: '',
-            currentStatus: '',
-            comment: '',
-            statusChange: '',
-            uploading: false
-        }
+    state = {
+        week: [],
+        status: [],
+        time: [],
+        weekOrigin: [],
+        currentIndex: '',
+        currentStatus: '',
+        comment: '',
+        statusChange: '',
+        uploading: false
     }
+
 
     dataStatus = [
         { id: 'atten', value: 'เข้าเรียน' },
@@ -53,33 +51,36 @@ export default class EditPage extends React.Component {
         const status = []
         const time = []
         Object.keys(attendance).sort((a, b) => (a.split('-')[1] - b.split('-')[1])).forEach(weekKey => {
-            objStudents = attendance[weekKey].students
+            objStudents = attendance[weekKey].students || {}
             sudentAtten = objStudents[Object.keys(objStudents).find(key => key == student)]
+            const weekText = []
+            weekText.push(attendance[weekKey].date.split('-').join(' / '))
+            weekText.push(['(','คาบที่',weekKey.split('-')[1],')'].join(' '))
+            week.push({ value: weekText.join('  ') })
+            weekOrigin.push(weekKey)
             if (sudentAtten) {
-                const weekText = []
-                weekText.push(attendance[weekKey].date.split('-').filter((d, i) => i !== 0).reverse().join(' / '))
-                weekText.push(this.readSession(attendance[weekKey].session))
-                week.push({ value: weekText.join('  ') })
-                weekOrigin.push(weekKey)
                 status.push(sudentAtten.status)
                 time.push(sudentAtten.time)
+            } else {
+                status.push('absent')
+                time.push('')
             }
         })
         this.setState({ week, weekOrigin, status, time, uploading: false })
     }
-    readSession = (session) => (
-        session === 'midnight'
-            ? 'คาบ เช้าตรู่'
-            : session === 'morning'
-                ? 'คาบ เช้า'
-                : session === 'afternoon'
-                    ? 'คาบ บ่าย'
-                    : session === 'evening'
-                        ? 'คาบ เย็น'
-                        : 'คาบ กลางคืน' //'night'
-    )
     submitButton = () => {
-        if (this.state.currentIndex !== '') {
+        if (this.state.currentIndex === '') {
+            Alert.alert(
+                'กรุณาเลือกคาบเรียน',
+                '',
+                [
+                    {
+                        text: 'ตกลง', onPress: () => { }
+                    } 
+                ],
+                { cancellable: false }
+            )
+        }else{
             Alert.alert(
                 'ยืนยันการเปลี่ยนแปลง',
                 'ต้องการเปลี่ยนข้อมูล หรือไม่',
@@ -100,11 +101,13 @@ export default class EditPage extends React.Component {
         const { student, attendance } = this.props.navigation.state.params
         const { weekOrigin, status, currentIndex, statusChange, comment } = this.state
         console.log(` upload to /Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}/`)
-        firebase.database().ref(`/Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}/status`).set(this.dataStatus.find(d => d.value === statusChange).id)
-        firebase.database().ref(`/Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}/comment`).set(comment)
+        const statusToSet = this.dataStatus.find(d => d.value === statusChange).id
+        firebase.database().ref(`/Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}`).update({ status: statusToSet, comment })
+        // firebase.database().ref(`/Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}/status`).set(statusToSet)
+        // firebase.database().ref(`/Subject/${id}/attendance/${weekOrigin[currentIndex]}/students/${student}/comment`).set(comment)
 
         // log 
-        const option = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' } // day/month/year 
+        const option = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' } // day/month/year hh:mm:ss
         const dateArr = new Date().toLocaleDateString('th-TH', option).split(' ')
         const date = [dateArr[0].split('/').join('-'), '(', 'dd-mm-yyyy', ')'].join(' ')
         const time = [dateArr[1].split(':').join('-'), '(', 'hh-mm-ss', ')'].join(' ')
@@ -140,7 +143,6 @@ export default class EditPage extends React.Component {
     render() {
         const { deviceHeight, deviceWidth } = this.props.screenProps.deviceSize
         const { week, status, time, currentIndex, statusChange } = this.state
-        // console.log(week)
         return (
             <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' >
                 <ScrollView style={{ backgroundColor: '#fff', height: deviceHeight, width: deviceWidth }} >
@@ -169,29 +171,12 @@ export default class EditPage extends React.Component {
                             }]}>
                                 {['รหัสนักศึกษา : ', this.props.navigation.state.params.student].join('')}
                             </Text>
-                            {/* <Text style={[styles.itemDetail, {
-                            fontSize: 1 / 25 * deviceHeight
-                        }]}>
-                            {focus.name}
-                        </Text> */}
                         </View>
                     </View>
-                    <View style={[styles.center, {
-                        width: deviceWidth,
-                        // marginTop: 1 / 20 * deviceHeight
-                    }]} >
-                        <View style={[styles.picker, {
-                            width: deviceWidth,
-                            // backgroundColor: 'red'
-                            // marginTop: 1 / 20 * deviceHeight
-                        }]} >
-                            {/* <Text style={{ fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} >
-                                {'วันที่ : '}
-                            </Text> */}
+                    <View style={[styles.center, { width: deviceWidth }]} >
+                        <View style={[styles.picker, { width: deviceWidth }]} >
                             <Dropdown
-                                label='วันเรียน : '
-                                // itemColor='#0070C0'
-                                // selectedItemColor='red'
+                                label='คาบเรียน : '
                                 containerStyle={{ width: 0.8 * deviceWidth }}
                                 itemTextStyle={{ paddingVertical: 1 / 60 * deviceHeight }}
                                 animationDuration={100}
@@ -203,32 +188,8 @@ export default class EditPage extends React.Component {
                                     })
                                 }}
                             />
-                            {/* <Picker
-                                style={{ width: 1 / 2 * deviceWidth, backgroundColor: 'blue' }}
-                                selectedValue={week[currentIndex]}
-                                aspectRatio={1 / 20 * deviceHeight}
-                                onValueChange={(value) => {
-                                    const index = week.findIndex(item => item === value)
-                                    this.setState({
-                                        currentIndex: index,
-                                        statusChange: status[index]
-                                    })
-                                }}
-                            >
-                                {
-                                    week.map(item => (
-                                        <Picker.Item style={{ fontSize: 1 / 10 * deviceHeight }} key={item} label={item} value={item} />
-                                    ))
-                                }
-                            </Picker> */}
                         </View>
-                        <View style={[styles.picker, {
-                            width: deviceWidth,
-                            // marginTop: 1 / 20 * deviceHeight
-                        }]} >
-                            {/* <Text style={{ fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} >
-                                {'สถานะ : '}
-                            </Text> */}
+                        <View style={[styles.picker, { width: deviceWidth }]} >
                             <Dropdown
                                 label='สถานะ : '
                                 textColor={
@@ -238,8 +199,6 @@ export default class EditPage extends React.Component {
                                             ? '#ffc000'
                                             : '#ff0000'
                                 }
-                                // fontSize = {1 / 20 * deviceHeight}
-                                // labelFontSize= {1 / 20 * deviceHeight}
                                 containerStyle={{ width: 0.8 * deviceWidth }}
                                 itemTextStyle={{ paddingVertical: 1 / 60 * deviceHeight }}
                                 animationDuration={100}
@@ -247,18 +206,8 @@ export default class EditPage extends React.Component {
                                 value={statusChange}
                                 onChangeText={(value) => this.setState({ statusChange: value })}
                             />
-                            {/* <Picker
-                                style={{ height: 3 / 20 * deviceHeight, width: 1 / 2 * deviceWidth }}
-                                selectedValue={this.state.statusChange}
-                                onValueChange={(value) => this.setState({ statusChange: value })}
-                            >
-                                <Picker.Item style={{ fontSize: 1 / 10 * deviceHeight }} key={1} label={'เข้าเรียน'} value={'atten'} />
-                                <Picker.Item style={{ fontSize: 1 / 10 * deviceHeight }} key={2} label={'มาสาย'} value={'late'} />
-                                <Picker.Item style={{ fontSize: 1 / 10 * deviceHeight }} key={3} label={'ขาดเรียน'} value={'absent'} />
-                            </Picker> */}
                         </View>
                         <View style={[styles.text, {
-                            // height: 1 / 20 * deviceHeight,
                             width: 0.8 * deviceWidth,
                             marginTop: 1 / 30 * deviceHeight
                         }]} >
@@ -276,42 +225,9 @@ export default class EditPage extends React.Component {
                                 paddingVertical: 1 / 80 * deviceHeight,
                             }}
                             underlineColorAndroid='#0070C0'
-                            // placeholder='กรุณากรอกรหัสนักศึกษา'
                             multiline
                             maxLength={200}
                             onChangeText={(Text) => { this.setState({ comment: Text }) }} />
-                        {/* <View style={[styles.text, { 
-                            height: 1 / 20 * deviceHeight, 
-                            width: 0.8 * deviceWidth
-                            }]} >
-                            <Text style={{ fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} >
-                                {['เวลา : ', time[currentIndex] ].join('')}
-                            </Text> 
-                        </View>
-                        <TextInput
-                            style={{
-                                height: 1.5 / 20 * deviceHeight,
-                                width: 0.8 * deviceWidth,
-                                fontSize: 1 / 30 * deviceHeight,
-                                paddingVertical: 1 / 120 * deviceHeight
-                            }}
-                            underlineColorAndroid='#0070C0'
-                            placeholder='กรุณากรอกรหัสนักศึกษา'
-                            keyboardType='numeric'
-                            maxLength={8}
-                            onChangeText={(Text) => { this.setState({ student: Text }) }} />
-
-                        <View style={[styles.text, {
-                            height: 1 / 0 * deviceHeight,
-                            width: 0.8 * deviceWidth
-                        }]} >
-                            <Text style={{ fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} >
-                                สถานะ :
-                    </Text>
-                            <Text style={{ flex: 1, textAlign: 'center', fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 50 * deviceHeight, color: textOutputColor }} >
-                                {textOutput}
-                            </Text>
-                        </View> */}
                     </View>
                     <View style={[styles.bot, {
                         height: 3 / 20 * deviceHeight,
@@ -346,8 +262,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        // justifyContent: 'center',
-        // position: 'relative',
         marginTop: 25
     },
     top: {
@@ -361,7 +275,6 @@ const styles = StyleSheet.create({
     },
     bot: {
         flexDirection: 'row',
-        // justifyContent: 'space-around',
         alignItems: 'center'
     },
     picker: {
@@ -375,7 +288,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#0070C0'
     },
     botButtonText: {
-        //flex: 1,
         textAlignVertical: 'center',
         textAlign: 'center',
         color: '#FFFFFF',

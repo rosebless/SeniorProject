@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator } from 'react-native';
 import Expo from 'expo';
 import firebase from '../config/firebase'
 import CustomButton from './CustomButton'
@@ -37,7 +37,6 @@ export default class Login extends React.Component {
     })
   }
   checkToSignIn = async (email, photoUrl) => {
-    // console.log(this.props)
     const professorID = email
     console.log('professorID', professorID)
     firebase.database().ref('/Professor').on('value', snapshot => {
@@ -56,7 +55,6 @@ export default class Login extends React.Component {
           name: currentUser.name,
           professorID: currentUser.professorID
         })
-        changeActivateStatus(0)
         navigate('DrawerNavigator')
       } else {
         console.log('currentUser flase')
@@ -101,8 +99,6 @@ export default class Login extends React.Component {
         }]}>
           <Image source={require('../pics/logo.png')} style={{ height: 8 / 21 * deviceHeight, width: 8 / 21 * deviceHeight }} />
         </View>
-        {/*<Text> {Dimensions.get('window').height} {Dimensions.get('window').width} </Text>
-        <Text> {deviceHeight} {deviceWidth} </Text>*/}
         <View style={[styles.form, {
           height: 3 / 20 * deviceHeight,
           width: deviceWidth,
@@ -115,18 +111,6 @@ export default class Login extends React.Component {
             }}
             text={'เข้าสู่ระบบ'}
           />
-          {/* <TouchableOpacity  style={[styles.loginButton, {
-            height: 1 / 10 * deviceHeight,
-            width: 0.6 * deviceWidth,
-            borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-          }]} >
-            <Text style={[styles.loginButtonText, {
-              fontSize: 1 / 15 * deviceHeight,
-              paddingVertical: 1 / 50 * deviceHeight
-            }]} >
-              เข้าสู่ระบบ
-                </Text>
-          </TouchableOpacity> */}
         </View>
         {/* <Button title='By Pass' onPress={() => {
           console.log('login', this.props.navigation)
@@ -153,15 +137,12 @@ const styles = StyleSheet.create({
     marginTop: 25
   },
   logo: {
-    //backgroundColor: '#ffa',
     alignItems: 'center',
     justifyContent: 'center',
   },
   form: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
-    //backgroundColor: '#ffb',
   },
   loginButton: {
     justifyContent: 'center',
@@ -170,7 +151,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0070C0'
   },
   loginButtonText: {
-    //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFFFFF',

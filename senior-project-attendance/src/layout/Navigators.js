@@ -35,7 +35,6 @@ const ScannerNavigator = createStackNavigator({
 }, {
         headerMode: 'none',
         headerVisible: false,
-        //header: null
         navigationOptions: {
             gesturesEnabled: false
         }
@@ -47,7 +46,6 @@ const DashboardNavigator = createStackNavigator({
 }, {
         headerMode: 'none',
         headerVisible: false,
-        //header: null
         navigationOptions: {
             gesturesEnabled: false
         }
@@ -58,18 +56,16 @@ const DrawerNavigator = createDrawerNavigator({
     Main,
     Profile,
     Selector,
-    // drawer group
-    // CustomDrawer,
     // subject manage group  
     SubjectManage_Selection,
     Manager,
     TimePicker,
-    // // scanning group 
+    // scanning group 
     Scanning_Selection,
-    ScannerNavigator, 
+    ScannerNavigator,
     // dashboard group 
     Dashboard_Selection,
-    DashboardNavigator   
+    DashboardNavigator
 }, {
         initialRouteName: 'Main',
         drawerWidth,
@@ -78,58 +74,13 @@ const DrawerNavigator = createDrawerNavigator({
         // drawerCloseRoute: 'DrawerClose',
         // drawerToggleRoute: 'DrawerToggle', 
         // order: ['Main', 'Selector', 'Profile', 'SubjectManage_Selection', 'Scanning_Selection', 'Dashboard_Selection'],
-        contentOptions: {
-            activeTintColor: 'red',
-        },
+        // contentOptions: {
+        //     activeTintColor: 'red',
+        // },
         navigationOptions: {
             gesturesEnabled: false
         }
     })
-
-// class NavigatorMain extends React.Component {
-//   static router = DrawerNavigator.router
-//   render() {
-//     return (
-//       <DrawerNavigator navigation={this.props.navigation}
-//         screenProps={{ ...this.props.screenProps }}
-//       />
-//     );
-//   }
-// } 
-
-// let drawerWidth = 0.8 * Dimensions.get('window').width
-
-// const Drawer = createDrawerNavigator({
-//         // commonpage
-//     Main,
-//     Profile,
-//     Selector,
-//     // drawer group
-//     // CustomDrawer,
-//     // subject manage group  
-//     SubjectManage_Selection,
-//     Manager,
-//     // // scanning group 
-//     Scanning_Selection,
-//     Scanner,
-//     ManualAttendance,
-//     // dashboard group 
-//     Dashboard_Selection,
-//     Dashboard
-// }, {
-//         initialRouteName: 'Main',
-//         drawerWidth,
-//         // contentComponent: props => <CustomDrawer screenProps={{ deviceSize, drawerWidth, goBack, name, photoUrl, drawerProps: activeItemKey ? { ...props, activeItemKey } : { ...props }, removeActiveItemKey: this.removeActiveItemKey }} />,
-//         // drawerOpenRoute: 'DrawerOpen',
-//         // drawerCloseRoute: 'DrawerClose',
-//         // drawerToggleRoute: 'DrawerToggle',
-//         contentOptions: {
-//             activeTintColor: 'red',
-//         },
-//         navigationOptions: {
-//             gesturesEnabled: false
-//         }
-//     })
 
 export default createStackNavigator({
     Login,
@@ -139,50 +90,8 @@ export default createStackNavigator({
 }, {
         headerMode: 'none',
         headerVisible: false,
-        //header: null
         navigationOptions: {
             gesturesEnabled: false
         }
     });
 
-
-// let deviceSize = {
-//     deviceHeight: Dimensions.get('window').height,
-//     deviceWidth: Dimensions.get('window').width
-// }
-// let drawerWidth = 0.75 * deviceSize.deviceWidth
-// const DrawerNavigator = createDrawerNavigator({
-//     // commonpage
-//     Register,
-//     Main,
-//     Profile,
-//     Selector,
-//     // drawer group
-//     // CustomDrawer,
-//     // subject manage group  
-//     SubjectManage_Selection,
-//     Manager,
-//     // scanning group 
-//     Scanning_Selection,
-//     Scanner,
-//     ManualAttendance,
-//     // dashboard group 
-//     Dashboard_Selection,
-//     Dashboard,
-// }
-//     // , {
-//     //     initialRouteName: 'Main',
-//     //     drawerWidth,
-//     //     // contentComponent: props => <CustomDrawer drawerProps={props} drawerWidth={drawerWidth} />,
-//     //     // drawerOpenRoute: 'DrawerOpen',
-//     //     // drawerCloseRoute: 'DrawerClose',
-//     //     // drawerToggleRoute: 'DrawerToggle', 
-//     //     // order: ['Main', 'Profile', 'SubjectManage_Selection', 'Scanning_Selection', 'Scanning_Selection'],
-//     //     // contentOptions: {
-//     //     //   activeTintColor: 'red',
-//     //     // },
-//     //     // navigationOptions: {
-//     //     //   gesturesEnabled: false
-//     //     // }
-//     //   }
-// );

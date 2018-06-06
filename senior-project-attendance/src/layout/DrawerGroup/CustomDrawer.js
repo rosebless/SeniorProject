@@ -1,28 +1,10 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
-// import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { Container, Content, Icon, Header, Body } from 'native-base'
-import { NavigationActions, DrawerItems } from 'react-navigation';
-import { StyleSheet, ScrollView, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import React from 'react';
+import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 import firebase from '../../config/firebase'
 import CustomDrawerItem from './CustomDrawerItem'
 
 export default class sCustomDrawer extends React.Component {
-
-  static navigationOptions = ({ navigation }) => ({
-    title: 'Custom',
-  })
-
   logOut = () => {
-    // this.props.navigation.pop()    
-    // this.props.navigation.reset()
-
-    // this.props.navigation.dangerouslyGetParent().goBack() 
     Alert.alert(
       'ต้องการออกจากระบบหรือไม่',
       '',
@@ -30,6 +12,7 @@ export default class sCustomDrawer extends React.Component {
         {
           text: 'ใช่', onPress: () => {
             firebase.database().ref('/Professor').off()
+            changeActivateStatus(0)
             this.props.drawerProps.navigation.navigate('Login')
           }
         },
@@ -38,11 +21,7 @@ export default class sCustomDrawer extends React.Component {
       { cancellable: false }
     )
   }
-
   render() {
-    // console.log('customDrawer', this.props)
-    // const { drawerProps, drawerWidth } = this.props.screenProps 
-    // console.log(this.props)
     const { navigation, drawerWidth, screenProps: { deviceSize: { deviceHeight, deviceWidth }, userLogOn: { name, photoUrl }, status, changeActivateStatus } } = this.props.drawerProps
     if (deviceHeight < deviceWidth) {
       var profile_height = 3 / 20 * deviceHeight
@@ -51,8 +30,6 @@ export default class sCustomDrawer extends React.Component {
       var profile_height = 1.5 / 4 * deviceWidth
       var profile_width = 1.5 / 4 * deviceWidth
     }
-    // const { picUrl, name } = AppVarible.appVarible.logOn
-    //const itemsmain
     return (
       <View style={styles.container}>
         <View style={[styles.profileHeader, {
@@ -131,10 +108,6 @@ export default class sCustomDrawer extends React.Component {
   }
 }
 
-// CustomDrawer.propTypes = {
-//   navigation: PropTypes.object
-// };
-
 const styles = StyleSheet.create({
   container: {
     paddingTop: 20,
@@ -168,5 +141,3 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   }
 });
-
-//AppRegistry.registerComponent('customDrawer', () => customDrawer)

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, Image, TextInput, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import DrawerHeader from './DrawerGroup/DrawerHeader';
 import firebase from '../config/firebase'
 import CustomButton from './CustomButton'
@@ -9,31 +9,33 @@ export default class ProfilePage extends React.Component {
     name: '',
     phone: ''
   }
-  // static navigationOptions = ({ navigation }) => ({
-  //   title: 'โปรไฟล์',
-  //   //headerLeft: <Icon name="ios-menu" style={{ paddingLeft: 10 }} onPress={() => navigation.navigate('DrawerOpen')} />,
-  //   //drawerLabel: 'Notification',
-  //   drawerIcon: ({ tintColor }) => (
-  //     <Image
-  //       source={require('../pics/profileMenu.png')}
-  //       style={styles.icon}
-  //     />
-  //   ),
-  // }) 
   submitButton = () => {
-    Alert.alert(
-      'ยืนยันการเปลี่ยนแปลง',
-      'ต้องการเปลี่ยนชื่อ และเบอร์โทรศัพท์ หรือไม่',
-      [
-        {
-          text: 'ใช่', onPress: () => {
-            this.submitChangeProfile()
-          }
-        },
-        { text: 'ไม่ใช่', onPress: () => { } }
-      ],
-      { cancellable: false }
-    )
+    if (name.trim() === '') {
+      Alert.alert(
+        'กรุณากรอกชื่อ',
+        '',
+        [
+          {
+            text: 'ตกลง', onPress: () => { }
+          },
+        ],
+        { cancellable: false }
+      )
+    } else {
+      Alert.alert(
+        'ยืนยันการเปลี่ยนแปลง',
+        'ต้องการเปลี่ยนชื่อ และเบอร์โทรศัพท์ หรือไม่',
+        [
+          {
+            text: 'ใช่', onPress: () => {
+              this.submitChangeProfile()
+            }
+          },
+          { text: 'ไม่ใช่', onPress: () => { } }
+        ],
+        { cancellable: false }
+      )
+    }
   }
   submitChangeProfile = () => {
     const { name, phone } = this.state
@@ -124,19 +126,6 @@ export default class ProfilePage extends React.Component {
                 }}
                 text={'ยืนยัน'}
               />
-              {/* <TouchableOpacity onPress={() => this.submitChangeProfile()}
-            style={[styles.summitButton, {
-              height: 1 / 10 * deviceHeight,
-              width: 0.6 * deviceWidth,
-              borderRadius: 1 / 3 * 1 / 10 * deviceHeight
-            }]} >
-            <Text style={[styles.summitButtonText, { 
-              fontSize: 1 / 15 * deviceHeight,
-              paddingVertical: 1 / 60 * deviceHeight
-              }]} > 
-              ยืนยัน 
-              </Text>
-          </TouchableOpacity> */}
             </View>
           </ScrollView >
         </View>
@@ -171,7 +160,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0070C0'
   },
   summitButtonText: {
-    //flex: 1,
     textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFFFFF',

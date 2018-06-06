@@ -484,9 +484,7 @@ export default class Import extends React.Component {
     onClickConfirm = () => {
         this.state.transaction === 'finish'
             ? setTimeout(() => { this.handleClose() }, 300)
-            : this.setState({ transaction: 'pending' }, () => {
-                // upload  
-                this.submit()
+            : this.setState({ transaction: 'pending' }, async () => {
                 // animetion 
                 setTimeout(() => {
                     this.setState({ transaction: 'finish' }, () => {
@@ -495,7 +493,11 @@ export default class Import extends React.Component {
                         // }, 1000)
                     })
                 }, 1000)
-
+                // upload  
+                await this.submit()
+                console.log(' ------------------------------ upload success ------------------------------ ')
+                // delete old file          
+                this.deleteOldSubject()
             })
     }
 
@@ -581,7 +583,7 @@ export default class Import extends React.Component {
     submit = async () => {
         const { files } = this.state
         var subjects = {}
-        var xxx = {};
+        // var xxx = {}; 
         files.forEach(async (file, index) => {
             // const id = file.name.split(' ')
             const reader = new FileReader();
@@ -610,16 +612,34 @@ export default class Import extends React.Component {
                 // console.log(subjects)
                 // firebase.database().ref('/Subject2').push(subjects || 'abc')
                 // console.log('read',this.state.subjects)
-                if (validation) {
-                    console.log(`upload to Subject/${id} `)
-                    firebase.database().ref('/Subject').child(id).set(subject)
-                    const { professorKey } = this.props.history.location.state
-                    console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
-                    firebase.database().ref(`/Professor/${professorKey}/subjects/${id}`).set({ name: subject.name })
-                    this.refs.fileComponent.removeFile(file)
-                } else {
-                    this.setState({ validation: false })
-                }
+                
+                // if (validation) {
+                //     console.log(`upload to Subject/${id} `)
+                //     const ref = firebase.database().ref('/Subject').child(id)
+                //     if (ref) {
+                //         ref.once('value').then(snapshot => {
+                //             const result = snapshot.val()
+                //             const newSubject = {
+                //                 ...result,
+                //                 ...subject
+                //             }
+                //             ref.set(newSubject)
+                //         })
+                //     } else {
+                //         ref.set(subject)
+                //     }
+                //     const { professorKey } = this.props.history.location.state
+                //     console.log(`upload to Professor/${professorKey}/subjects/${id}/${subject.name} `)
+                //     firebase.database().ref(`/Professor/${professorKey}/subjects/${id}`).set({ name: subject.name }).then(() => {
+                //         // delete display
+                //         this.refs.fileComponent.removeFile(file)
+                //         // delete old file          
+                //         this.deleteOldSubject(id.substr(0, 6))
+                //     })
+                // } else {
+                //     this.setState({ validation: false })
+                // }
+                console.log(' ------------------------------ reading ------------------------------ ')
             }
             await reader.readAsBinaryString(file);
         })
@@ -628,6 +648,60 @@ export default class Import extends React.Component {
         // await this.upload(subjects).then(() => { console.log('successFully') }).catch((e) => { console.log(e) })
         // console.log('hello eiei')
         // this.refs.fileComponent.removeFiles()
+    }
+
+    deleteOldSubject = (termInput = '') => {
+        const startTerm1 = { month: 7, day: 1 }
+        const startTerm2 = { month: 1, day: 1 }
+        let year, term
+        const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+        const currentYear = parseInt(currentDate.split('/')[2])
+        const currentMonth = parseInt(currentDate.split('/')[1])
+        const currentDay = parseInt(currentDate.split('/')[0])
+        if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+            year = currentYear - 1
+            term = 2
+        } else {
+            year = currentYear
+            term = 1
+        }
+        const currentTerm = [year, term].join('-')
+        if (termInput !== currentTerm) {
+            // const oneStepBackTerm = term === 1
+            //     ? [year - 1, 2].join('-')
+            //     : [year, term - 1].join('-') 
+            const twoStepBackTerm = [year - 1, term].join('-')
+            const ref = firebase.database().ref('Subject')
+            if (ref) {
+                // ref.orderByKey().startAt("2559-").endAt("2560~").once('value', snapshot => {
+                ref.orderByKey().endAt([twoStepBackTerm, '~'].join('')).once('value', snapshot => {
+                    Object.keys(snapshot.val() || {}).forEach(subjectKey => {
+                        console.log('delete the data : ', ref.child(subjectKey).toJSON())
+                        ref.child(subjectKey).remove()
+                    })
+                })
+            }
+            const { professorKey } = this.props.history.location.state
+            const ref2 = firebase.database().ref(`Professor/${professorKey}/subjects`)
+            if (ref2) {
+                ref2.orderByKey().endAt([twoStepBackTerm, '~'].join('')).once('value', snapshot => {
+                    Object.keys(snapshot.val() || {}).forEach(subjectKey => {
+                        console.log('delete the data : ', ref2.child(subjectKey).toJSON())
+                        ref2.child(subjectKey).remove()
+                    })
+                })
+            }
+            // firebase.database().ref('Subject').orderByValue().once('value', snapshot => {
+            //     const keys = Object.keys(snapshot.val())
+            //     const keysToDelete = keys.filter( key =>{ 
+            //         const keyTerm = key.split('-').filter((k,i)=> i<2).join('-') 
+            //         return keyTerm !== currentTerm && keyTerm !== oneStepBackTerm
+            //     } ) 
+            //     keysToDelete.forEach( key => {
+            //         firebase.database().ref(`Subject${key}`).remove()
+            //     })
+            // })
+        }
     }
 
     //          storage 
@@ -668,40 +742,40 @@ export default class Import extends React.Component {
     //     };
     // }
 
-    upload = async (subjects) => {
-        // const { subjects } = this.state
-        console.log('subjects', subjects)
-        console.log('subjects', Object.keys(subjects))
-        // debugger
-        // upload to Subject 
+    // upload = async (subjects) => {
+    //     // const { subjects } = this.state
+    //     console.log('subjects', subjects)
+    //     console.log('subjects', Object.keys(subjects))
+    //     // debugger
+    //     // upload to Subject 
 
-        // let subjectR = {
-        //     name: subjects.key.name
-        // }
-        // console.log('subjectR', subjectR)
-        const subjectsOld = await this.getOldSubject()
-        console.log('subjectsOld', subjectsOld)
-        const preUpload = { ...subjectsOld, ...subjects }
-        console.log('subject upload', preUpload)
-        await firebase.database().ref('/Subject2').set(preUpload || 'abc').then(() => { console.log('upload subject success', preUpload || 'abc') }).catch(() => { console.log('upload subject  false') })
-        console.log('subjects', subjects)
+    //     // let subjectR = {
+    //     //     name: subjects.key.name
+    //     // }
+    //     // console.log('subjectR', subjectR)
+    //     const subjectsOld = await this.getOldSubject()
+    //     console.log('subjectsOld', subjectsOld)
+    //     const preUpload = { ...subjectsOld, ...subjects }
+    //     console.log('subject upload', preUpload)
+    //     await firebase.database().ref('/Subject2').set(preUpload || 'abc').then(() => { console.log('upload subject success', preUpload || 'abc') }).catch(() => { console.log('upload subject  false') })
+    //     console.log('subjects', subjects)
 
-        // upload to User  
-        const { professorKey } = this.props.history.location.state
-        const userSubjectsOld = await this.getOldProfessorSubject()
-        let userSubjects = {}
-        console.log('userSubjects', userSubjects)
-        await Object.keys(subjects).forEach(key => {
-            console.log('key', key)
-            userSubjects[key] = { name: subjects[key].name }
-        })
-        console.log('subjects', subjects)
-        console.log('userSubjects', userSubjects)
-        const preUploadUser = await { ...userSubjectsOld, ...userSubjects }
-        console.log('user subject upload', preUploadUser)
-        await firebase.database().ref('/Professor').child(professorKey).child('subjects').set(preUploadUser)
-        console.log('successFull')
-    }
+    //     // upload to User  
+    //     const { professorKey } = this.props.history.location.state
+    //     const userSubjectsOld = await this.getOldProfessorSubject()
+    //     let userSubjects = {}
+    //     console.log('userSubjects', userSubjects)
+    //     await Object.keys(subjects).forEach(key => {
+    //         console.log('key', key)
+    //         userSubjects[key] = { name: subjects[key].name }
+    //     })
+    //     console.log('subjects', subjects)
+    //     console.log('userSubjects', userSubjects)
+    //     const preUploadUser = await { ...userSubjectsOld, ...userSubjects }
+    //     console.log('user subject upload', preUploadUser)
+    //     await firebase.database().ref('/Professor').child(professorKey).child('subjects').set(preUploadUser)
+    //     console.log('successFull')
+    // }
 
     getOldSubject = () => new Promise((resolve, reject) => {
         firebase.database().ref('/Subject').once('value').then(snapshot => {
@@ -763,7 +837,6 @@ export default class Import extends React.Component {
         return validation
     }
 
-
     getDataForFirebase = async (data) => {
         const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
         let validation = true
@@ -806,8 +879,8 @@ export default class Import extends React.Component {
         const attendanceOld = await this.getOldAttendaceInSubject(id)
         const professors = professorsOld
         const indexP = professors.findIndex(professor => professor.professorID === professorID)
-        console.log('indexP',indexP)
-        if (indexP!==-1) {
+        console.log('indexP', indexP)
+        if (indexP !== -1) {
             professors[indexP] = {
                 professorID,
                 name: professorsName,
@@ -821,9 +894,9 @@ export default class Import extends React.Component {
             })
         }
         const subject = {
-            year,
-            term,
-            code,
+            subjectYear: year,
+            subjectTerm: term,
+            subjectID: code,
             name,
             count,
             students,
@@ -870,14 +943,14 @@ export default class Import extends React.Component {
                                     accepts={['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']}
                                 >
                                     {/* <div  /> */}
-                                <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
-                                    style={{ height: '40vh', width: '40vh', backgroundColor: 'white', borderRadius: '15%', border: 'thick solid rgb(15, 111, 198)' }}
+                                    <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
+                                        style={{ height: '40vh', width: '40vh', backgroundColor: 'white', borderRadius: '15%', border: 'thick solid rgb(15, 111, 198)' }}
                                     // onClick={() => this.input.click()}
-                                >
-                                    <div className='innerFileInput' style={{ height: '32vh', width: '35vh' }} ref={input => this.input = input} >
-                                        <img style={{ height: '20%', width: '20%' }} src={require('../photo/addButton.png')} />
-                                    </div>
-                                </Button>
+                                    >
+                                        <div className='innerFileInput' style={{ height: '32vh', width: '35vh' }} ref={input => this.input = input} >
+                                            <img style={{ height: '20%', width: '20%' }} src={require('../photo/addButton.png')} />
+                                        </div>
+                                    </Button>
                                 </File>
                             </Grid>
                             <Grid item xs />

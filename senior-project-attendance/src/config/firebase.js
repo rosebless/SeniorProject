@@ -10,12 +10,12 @@ import firebase from 'firebase'
 // }; 
 
 const config = {
-    apiKey: "AIzaSyC9lmq0_zfypm163sb6OtQXLCVwUGrmrf0",
-    authDomain: "project-attendance.firebaseapp.com",
-    databaseURL: "https://project-attendance.firebaseio.com",
-    projectId: "project-attendance",
-    storageBucket: "project-attendance.appspot.com",
-    messagingSenderId: "1000125294069"
-  };
+  apiKey: "AIzaSyC9lmq0_zfypm163sb6OtQXLCVwUGrmrf0",
+  authDomain: "project-attendance.firebaseapp.com",
+  databaseURL: "https://project-attendance.firebaseio.com",
+  projectId: "project-attendance",
+  storageBucket: "project-attendance.appspot.com",
+  messagingSenderId: "1000125294069"
+};
 
-export default firebase.initializeApp(config);
+export default firebase.initializeApp(config); 
