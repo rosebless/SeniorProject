@@ -1,5 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import XLSX from 'xlsx'
+import firebase from '../config/firebase'
 
 const mimeTypeRegexp = /^(application|audio|example|image|message|model|multipart|text|video)\/[a-z0-9\.\+\*-]+$/;
 const extRegexp = /\.[a-z0-9]*$/;
@@ -24,7 +26,7 @@ class Files extends React.Component {
     var dateAll, date, month, year, TimeType, hour, minutes, seconds, fullTime;
     dateAll = new Date();
     date = dateAll.getDate();
-    month = dateAll.getMonth();
+    month = dateAll.getMonth() + 1;
     year = dateAll.getFullYear();
     hour = dateAll.getHours();
     if (hour <= 11) {
@@ -55,6 +57,125 @@ class Files extends React.Component {
 
     return fullTime
   }
+  // readFile =  () => {
+  //   const { files } = this.state
+  //   files.forEach(async(file, index) => {
+  //     const reader = new FileReader();
+  //     reader.onload = async (e) => {
+  //       console.log(' ----------------------------- reading ------------------------------ ')
+  //       const dataTemp = e.target.result;
+  //       const workbook = XLSX.read(dataTemp, { type: 'binary' });
+  //       const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 'A' });
+  //       const [id, subject, validation] = await this.getDataForFirebase(data)
+
+  //       files[index].subjectID = id
+  //       files[index].subject = subject
+  //       files[index].validation = validation
+
+  //       this.setState({ files })
+  //     }
+  //     await reader.readAsBinaryString(file);
+  //   })
+  // }
+  // getDataForFirebase = async (data) => {
+  //   const { professorKey, professorID, professorsName, photoUrl } = this.props.history.location.state
+  //   let validation = data[2]['E'] && data[3]['E']
+  //   // console.log(professorID, photoUrl)
+  //   const term = data[2]['E'] ? data[2]['E'].trim().split(' ')[1] : ''
+  //   const year = data[2]['E'] ? data[2]['E'].trim().split(' ')[3] : ''
+  //   const e3split = data[3]['E'] ? data[3]['E'].trim().split('  ') : ['', '', '', '', '']
+  //   const code = e3split[0]
+  //   const name = e3split[1]
+  //   const sec = e3split[2]
+  //   let count = ''
+  //   let major = ''
+  //   if (e3split.length == 4) {
+  //     count = e3split[3].split(' ')[1]
+  //   }
+  //   else {
+  //     major = e3split[3]
+  //     count = e3split[4].split(' ')[1] || ''
+  //   }
+  //   const [students, countToCheck] = this.readStudent(data)
+  //   // if (countToCheck.toString() !== count) {
+  //   //     validation = false
+  //   // }
+  //   let secForId = sec.split(' ')[1]
+  //   const id = secForId === undefined
+  //     ? [year, term, code].join('-')
+  //     : [year, term, code, secForId].join('-')
+  //   const professorsOld = await this.getOldProfessorInSubject(id)
+  //   console.log('sadsdassda', professorKey)
+  //   // const attendanceOld = await this.getOldAttendaceInSubject(id)
+  //   const professors = professorsOld
+  //   const indexP = professors.findIndex(professor => professor.professorID === professorID)
+  //   console.log('indexP', indexP)
+  //   if (indexP !== -1) {
+  //     professors[indexP] = {
+  //       professorID,
+  //       name: professorsName,
+  //       photoUrl
+  //     }
+  //   } else {
+  //     professors.push({
+  //       professorID,
+  //       name: professorsName || '',
+  //       photoUrl
+  //     })
+  //   }
+  //   const subject = {
+  //     subjectYear: year,
+  //     subjectTerm: term,
+  //     subjectID: code,
+  //     name,
+  //     count: countToCheck.toString(),
+  //     students,
+  //     // countToCheck,
+  //     professors,
+  //     // attendance: attendanceOld
+  //   }
+  //   validation = validation && this.checkForValidation(subject)
+  //   return [id, subject, validation]
+  // }
+  // readStudent = (data, studentIDColumn = 'B', studentNameColumn = 'C') => {
+  //   let students = {}
+  //   let countToCheck = 0
+  //   data.forEach((item, indexx) => {
+  //     // if (5 < indexx % 41) {
+  //     //     students[item['B'].trim()] = item['C'].trim()
+  //     //     countToCheck++
+  //     //     if (item['B'].trim().length !== 8) {
+  //     //         validation = false
+  //     //     }
+  //     // } 
+  //     if (item[studentIDColumn] && item[studentIDColumn].trim().length === 8 && !isNaN(parseInt(item[studentIDColumn].trim(), 10))) {
+  //       students[item['B'].trim()] = item[studentNameColumn] ? item[studentNameColumn].trim() : ''
+  //       countToCheck++
+  //     }
+  //   })
+  //   return [students, countToCheck]
+  // }
+  // getOldProfessorInSubject = (key) => new Promise((resolve, reject) => {
+  //   firebase.database().ref('/Subject').child(key).child('professors').once('value').then(snapshot => {
+  //     // console.log(snapshot.val())
+  //     resolve(snapshot.val() || []);
+  //   })
+  // })
+  // checkForValidation = (subject) => {
+  //   let validation = true
+  //   if (subject.subjectYear && subject.subjectYear.length !== 4) {
+  //     validation = false
+  //   }
+  //   if (subject.subjectTerm && subject.subjectTerm.length !== 1) {
+  //     validation = false
+  //   }
+  //   if (subject.subjectID && subject.subjectID.length !== 8) {
+  //     validation = false
+  //   }
+  //   return validation
+  // }
+
+  // End by SW 
 
   onDrop(event) {
     event.preventDefault()
@@ -84,8 +205,9 @@ class Files extends React.Component {
 
       // Add by SW 
       file.addedTime = this.getTime()
-      file.countSame = 0  
+      file.countSame = 0
       file.validation = true
+      // End by SW 
 
       // Add preview, either image or file extension
       if (file.type && this.mimeTypeLeft(file.type) === 'image') {
@@ -257,7 +379,7 @@ class Files extends React.Component {
     this.setState({
       files: this.state.files.filter(file => file.id !== fileToRemove.id)
     }, () => {
-      this.props.onChange.call(this, this.state.files)
+      // this.props.onChange.call(this, this.state.files)
     })
   }
 

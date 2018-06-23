@@ -15,7 +15,9 @@ export default class Import extends React.Component {
         files: [],
         subjects: {},
         transaction: 'wait confirm',
-        openDialog: false
+        openDialog: false,
+        loading: false,
+        buttonDisabled: true
     }
 
     handleOpen = () => {
@@ -48,7 +50,9 @@ export default class Import extends React.Component {
     }
 
     componentDidMount = () => {
-        this.generate()
+        this.setState({ loading: true }, () => {
+            this.generate()
+        })
     }
 
     componentWillUnmount = () => {
@@ -76,9 +80,15 @@ export default class Import extends React.Component {
         if (ref) {
             ref.orderByKey().startAt([currentTerm, '-'].join('')).endAt([currentTerm, '~'].join('')).on('value', snapshot => {
                 const objSubject = snapshot.val()
-                const files = Object.keys(objSubject).map((key) => ({ id: key, name: objSubject[key].name, checked: false }))
-                this.setState({ files })
+                if (objSubject) {
+                    const files = Object.keys(objSubject).map((key) => ({ id: key, name: objSubject[key].name, checked: false }))
+                    this.setState({ files, loading: false })
+                } else {
+                    this.setState({ loading: false })
+                }
             })
+        } else {
+            this.setState({ loading: false })
         }
         // firebase.database().ref('/Professor').child(professorKey).child('subjects').on('value', snapshot => {
         //     const objSubject = snapshot.val()
@@ -113,7 +123,8 @@ export default class Import extends React.Component {
             ...file,
             checked: index === indexx ? !file.checked : file.checked
         }))
-        this.setState({ files: newFiles }, () => console.log(this.state.files))
+        const haveSelect = newFiles.find(file => file.checked) // file.checked === true
+        this.setState({ files: newFiles, buttonDisabled: haveSelect ? false : true }, () => console.log(this.state.files))
     }
 
     exportFile = () => {
@@ -267,7 +278,7 @@ export default class Import extends React.Component {
 
     render() {
         const { mode } = this.props.history.location.state
-        const { files } = this.state
+        const { files, buttonDisabled } = this.state
         console.log(files)
         return (
             <div className='container' >
@@ -278,7 +289,7 @@ export default class Import extends React.Component {
                         <Grid item xs />
                         <Grid item xs={7} >
                             <SubjectList className='list' mode={mode} files={files} height={'60vh'}
-                                onChecked={this.onChecked} />
+                                onChecked={this.onChecked} loading={this.state.loading} />
                         </Grid>
                         <Grid item xs />
                     </Grid>
@@ -286,8 +297,8 @@ export default class Import extends React.Component {
                     <Grid container spacing={24} xl={3} >
                         <Grid item xs />
                         <Grid item xs={2} >
-                            <Button variant="outlined" component="span" TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
-                                style={{ width: '100%', color: 'rgb(15, 111, 198)', backgroundColor: 'white', fontFamily: 'bangna-new', fontSize: '1.5vw', fontWeight: 'bold', borderRadius: '1vw', border: 'thick solid rgb(15, 111, 198)' }}
+                            <Button variant="outlined" component="span" disabled={buttonDisabled} TouchRippleProps={{ style: { color: 'rgb(15, 111, 198)' } }}
+                                style={{ width: '100%', color: buttonDisabled ? 'rgb(210, 210, 210)' : 'rgb(15, 111, 198)', backgroundColor: 'white', fontFamily: 'bangna-new', fontSize: '1.5vw', fontWeight: 'bold', borderRadius: '1vw', border: buttonDisabled ? 'thick solid rgb(210, 210, 210)' : 'thick solid rgb(15, 111, 198)' }}
                                 onClick={() => { this.handleOpen() }}
                             >
                                 ยืนยัน
@@ -298,26 +309,6 @@ export default class Import extends React.Component {
                     </Grid>
                     {/* <Grid item xs /> */}
                 </Grid>
-                {/* <div className='bodyEx' style={{ height: 16.25 / 19 * height, width }} >
-                    <div className='topEx' style={{ height: 12.75 / 19 * height, width }} >
-                        <div className='borderList' style={{ height: 0.95 * 12.75 / 19 * height, width: 0.5 * width }} >
-                            <SubjectList className='list' mode={mode} files={files} height={height} width={width}
-                                cancelSelection={this.cancelSelection} onChecked={this.onChecked} />
-                        </div >
-                    </div>
-
-                    <div className='botEx' style={{ height: 2 / 19 * height, width }} >
-                        <button onClick={() => { this.exportFile() }}
-                            className='button'
-                            style={{
-                                height: 0.8 * 2 / 19 * height, width: 1 / 10 * width,
-                                borderRadius: 0.2 * 0.8 * 2 / 19 * height, marginTop: 0.2 * 0.8 * 2 / 19 * height,
-                                fontSize: 0.5 * 0.8 * 2 / 19 * height
-                            }}>
-                            ยืนยัน
-                        </button>
-                    </div>
-                </div> */}
             </div>
         );
     }

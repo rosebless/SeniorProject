@@ -31,6 +31,7 @@ export default class Register extends React.Component {
         name
       })
       this.setState({ uploading: false })
+      this.props.screenProps.changeActivateStatus(0)
       this.props.navigation.navigate('DrawerNavigator')
     }
   }

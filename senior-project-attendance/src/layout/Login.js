@@ -27,6 +27,7 @@ export default class Login extends React.Component {
             // })
             //return firebase.auth().signInWithCredential(credential)
           } else {
+            this.setState({ uploading: false })
             return { cancelled: true };
           }
         }
@@ -55,6 +56,7 @@ export default class Login extends React.Component {
           name: currentUser.name,
           professorID: currentUser.professorID
         })
+        this.props.screenProps.changeActivateStatus(0)
         navigate('DrawerNavigator')
       } else {
         console.log('currentUser flase')

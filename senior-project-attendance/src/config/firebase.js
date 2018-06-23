@@ -18,4 +18,42 @@ const config = {
   messagingSenderId: "1000125294069"
 };
 
-export default firebase.initializeApp(config); 
+const fb = firebase.initializeApp(config)
+
+const refConfig = fb.database().ref('/Config')
+refConfig.once('value', snapshot => {
+  if (!snapshot.val()) {
+    const con = {
+      'start-term': {
+        'term-1': {
+          'comment': 'dd-mm-yyyy',
+          'date': '1-8-2560'
+        },
+        'term-2': {
+          'comment': 'dd-mm-yyyy',
+          'date': '1-1-2561'
+        },
+        'term-3': {
+          'comment': 'dd-mm-yyyy',
+          'date': '1-6-2561'
+        }
+      }
+    }
+    refConfig.set(con)
+  }
+})
+const initial = {
+  'initial': 'create for initalize'
+}
+
+const refProfessor = fb.database().ref('/Professor')
+refProfessor.once('value', snapshot => {
+  if (!snapshot.val()) refProfessor.set(initial)
+})
+
+const refSubject = fb.database().ref('/Subject')
+refSubject.once('value', snapshot => {
+  if (!snapshot.val()) refSubject.set(initial)
+})
+
+export default fb;

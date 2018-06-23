@@ -6,7 +6,8 @@ import firebase from '../config/firebase'
 export default class selection extends React.Component {
   state = {
     subjects: [],
-    uploading: false
+    uploading: false,
+    now: {}
   }
   componentWillMount = () => {
     // firebase.database().goOffline()
@@ -20,24 +21,65 @@ export default class selection extends React.Component {
     firebase.database().ref('/Professor').child(this.props.screenProps.userLogOn.professorKey).child('subjects').off()
   }
 
-  getUserSubjectsFormFirebase = () => {
+  getCurrentTerm = () => new Promise((resolve) => {
+    firebase.database().ref('/Config/start-term').on('value', snapshot => {
+      let startTerm = {}
+      Object.keys(snapshot.val()).forEach(key => {    // key = term-1 , term-2 , term-3 
+        const date = snapshot.val()[key].date.split('-')
+        startTerm[key.split('-').join('')] = {
+          day: date[0],
+          month: date[1],
+          year: date[2]
+        }
+      })
+      const dateAll = new Date()
+      const now = {
+        day: dateAll.getDate(),
+        month: dateAll.getMonth() + 1,
+        year: dateAll.getFullYear()
+      }
+      this.setState({ now }, () => {
+        let currentTerm = ''
+        if (this.isAfterNow(startTerm['term1']) && this.isBeforeNow(startTerm['term2'])) {
+          currentTerm = [startTerm['term1'].year, 1].join('-')
+        } else if (this.isAfterNow(startTerm['term2']) && this.isBeforeNow(startTerm['term3'])) {
+          currentTerm = [startTerm['term1'].year, 2].join('-')
+        } else {
+          currentTerm = [startTerm['term1'].year, 3].join('-')
+        }
+        resolve(currentTerm)
+      })
+    })
+  })
+
+  isBeforeNow = (time) => {
+    const { now } = this.state
+    return time.year < now.year ||
+      (time.year === now.year && time.month < now.month) ||
+      (time.year === now.year && time.month === now.month && time.day < now.day)
+  }
+
+  isAfterNow = (time) => !this.isBeforeNow(time)
+
+  getUserSubjectsFormFirebase = async () => {
     const { professorKey } = this.props.screenProps.userLogOn
-    console.log(professorKey)
-    const startTerm1 = { month: 7, day: 1 }
-    const startTerm2 = { month: 1, day: 1 }
-    let year, term
-    const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
-    const currentYear = parseInt(currentDate.split('/')[2])
-    const currentMonth = parseInt(currentDate.split('/')[1])
-    const currentDay = parseInt(currentDate.split('/')[0])
-    if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
-      year = currentYear - 1
-      term = 2
-    } else {
-      year = currentYear
-      term = 1
-    }
-    const currentTerm = [year, term].join('-')
+    // const startTerm1 = { month: 7, day: 1 }
+    // const startTerm2 = { month: 1, day: 1 }
+    // let year, term
+    // const currentDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })
+    // const currentYear = parseInt(currentDate.split('/')[2])
+    // const currentMonth = parseInt(currentDate.split('/')[1])
+    // const currentDay = parseInt(currentDate.split('/')[0])
+    // if (startTerm2.month <= currentMonth && currentMonth < startTerm1.month) {
+    //   year = currentYear - 1
+    //   term = 2
+    // } else {
+    //   year = currentYear
+    //   term = 1
+    // }
+    // const currentTerm = [year, term].join('-') 
+    const currentTerm = await this.getCurrentTerm() 
+    console.log(' Selector Search term : ',currentTerm)
     firebase.database().ref('/Professor').child(professorKey).child('subjects').orderByKey().startAt([currentTerm, '-'].join('')).endAt([currentTerm, '~'].join('')).on('value', snapshot => {
       const objSubject = snapshot.val() || {}
       const subjects = Object.keys(objSubject).map((key, index) => {
@@ -110,7 +152,7 @@ export default class selection extends React.Component {
     }
   };
   render() {
-    console.log('selection', this.props)
+    // console.log('selection', this.props)
     const { deviceSize: { deviceHeight, deviceWidth }, descriptionForSelector: { namePage, iconPage, screenNavigate }, selectFocus } = this.props.screenProps
     const { subjects } = this.state
     const { navigate, openDrawer } = this.props.navigation

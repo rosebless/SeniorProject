@@ -31,7 +31,9 @@ export default class MainPage extends React.Component {
             style={{
               height: profile_height,
               width: profile_width,
-              borderRadius: 1 / 2 * profile_height
+              borderRadius: 1 / 2 * profile_height,
+              borderWidth: 1 / 75 * profile_height,
+              borderColor: '#0070C0',
             }}
           />
           <Text style={{

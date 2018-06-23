@@ -12,7 +12,7 @@ export default class sCustomDrawer extends React.Component {
         {
           text: 'ใช่', onPress: () => {
             firebase.database().ref('/Professor').off()
-            changeActivateStatus(0)
+            // this.props.screenProps.changeActivateStatus(0)
             this.props.drawerProps.navigation.navigate('Login')
           }
         },
@@ -56,7 +56,7 @@ export default class sCustomDrawer extends React.Component {
                 borderRadius: 1 / 2 * profile_height,
                 borderWidth: 1 / 75 * profile_height,
                 borderColor: '#0070C0',
-                backgroundColor: '#0070C0'
+                // backgroundColor: '#0070C0'
               }}
             />
             <Text style={{ fontSize: 1 / 20 * deviceHeight, paddingVertical: 1 / 60 * deviceHeight }} > {name} </Text>
